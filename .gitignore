@@ -1,0 +1,43 @@
+build/
+NetrwTreeListing
+
+# text editor metadata
+compile_commands.json
+tags
+.vscode/*
+*.swp
+
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+CMakeUserPresets.json
+cmake-build-debug
+
+.env
+.antlr
+.venv
+
+# MACOS
+.DS_Store
+
+# other
+.cache
+.idea
+
+src/targets/experiments/stocks/expected_results
+src/targets/experiments/smart_homes/expected_results
+src/targets/experiments/taxis/expected_results
+src/targets/experiments/taxis/taxi_data.csv
+src/targets/experiments/smart_homes/benchmark.csv
+src/targets/experiments/stocks/benchmark.csv
+src/targets/experiments/taxis/benchmark.csv
+
+.direnv
+
+events_*
+
+__pycache__
+logs
+expected_results/

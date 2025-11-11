@@ -9,10 +9,18 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "direct"
 BUILD = (sys.argv[2].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/unordered_stocks/queries/other-q1_any.txt"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/stocks/queries/other-q2_any.txt"
 DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/unordered_stocks/declaration.core"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/unordered_stocks/unordered_stocks.csv"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/unordered_stocks/stock_data.csv"
 OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/unordered_stocks/quarantine_declaration.core"
+
+# Support flag-style --options or -o anywhere on the command line. This
+# preserves the existing positional behavior (6th arg) but allows callers
+# to pass: python experiment.py wait --options path/to/options.core
+for i, a in enumerate(sys.argv):
+    if a in ("--options", "-o") and i + 1 < len(sys.argv):
+        OPTIONS = sys.argv[i + 1]
+        break
 
 DIR = "Debug" if BUILD == "debug" else "Release"
 MOUNT_FLAGS = ["-v", f"{PROJECT_ROOT}:/workspace", "-w", "/workspace"]
@@ -145,12 +153,12 @@ if __name__ == "__main__":
         print(f"Query throughput       : {num_results / core_time:.2f} results/sec")
     elif MODE == "wait":
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
-        received_wait, sent_wait, events_wait, core_time = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait,complex_events, core_time = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         print("\n🔍 Results:")
         print(f"Number of input events : {count_events(CSV_PATH)}")
-        print(f"Number of results      : {len(events_wait)}")
+        print(f"Number of results      : {len(complex_events)}")
         print(f"Query execution time   : {core_time:.2f}s")
-        print(f"Query throughput       : {len(events_wait) / core_time:.2f} results/sec")
+        print(f"Query throughput       : {len(complex_events) / core_time:.2f} results/sec")
     elif MODE == "compare":
         cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
@@ -161,16 +169,16 @@ if __name__ == "__main__":
         print(f"Query throughput       : {num_results_direct / core_time:.2f} results/sec")
         
         print("\nRunning WAIT quarantine policy…")
-        received_wait, sent_wait, events_wait, core_time = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait, complex_events, core_time = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         print(f"Query execution time   : {core_time:.2f}s")
-        print(f"Query throughput       : {len(events_wait) / core_time:.2f} results/sec")
+        print(f"Query throughput       : {len(complex_events) / core_time:.2f} results/sec")
         
         print("\n🔍 Comparison Results:")
         print(f"Number of input events         : {count_events(CSV_PATH)}")
         print(f"Number of results (DIRECT)     : {num_results_direct}")
-        print(f"Number of results (WAIT)       : {len(events_wait)}")
+        print(f"Number of results (WAIT)       : {len(complex_events)}")
         
-        if num_results_direct == len(events_wait):
+        if num_results_direct == len(complex_events):
             print("✅ Both policies produced the SAME number of results.")
         else:
             print("❌ Different number of results between policies!")

@@ -22,15 +22,6 @@ using namespace CORE;
 int main(int argc, char** argv) {
   FrameMark;
   try {
-
-    std::string manual_options_path = "";
-    for (int i = 0; i < argc - 1; i++) {
-      if (std::string(argv[i]) == "--options") {
-        manual_options_path = argv[i + 1];
-        break;
-      }
-    }
-
     Library::ServerConfig server_config = Library::ServerConfig::from_args(argc, argv);
     Library::OfflineServer server{std::move(server_config)};
     Client client{"tcp://localhost", server.get_server_config().get_fixed_ports().router};
@@ -42,13 +33,10 @@ int main(int argc, char** argv) {
 
     Types::StreamInfo stream_info = client.declare_stream(declaration_string);
 
-    // Use manual argument parsing for quarantine options
-    if (!manual_options_path.empty()) {
-      
-      std::string option_declaration_string = client.read_file(manual_options_path);
-      
+    if (server.get_server_config().get_options_path().size() > 0) {
+      std::string option_declaration_string = client.read_file(
+        server.get_server_config().get_options_path());
       client.declare_option(option_declaration_string);
-      
     }
 
     std::cout << "Query: " << query_string << std::endl;

@@ -1,0 +1,32 @@
+
+============================================================
+🔬 WAIT Quarantine Policy
+============================================================
+➜ docker run --rm --platform linux/amd64 -e TRACY_NO_INVARIANT_CHECK=1 -v /home/kotsoskoutsi/Downloads/CORE-main:/workspace -w /workspace core-dev /CORE/build/Release/offline --query /workspace/src/targets/experiments/unordered_stocks/queries/other-q1_any.txt --declaration /workspace/src/targets/experiments/unordered_stocks/declaration.core --csv /workspace/src/targets/experiments/unordered_stocks/unordered_stocks.csv --options /workspace/src/targets/experiments/unordered_stocks/quarantine_declaration.core
+
+Query:
+  SELECT * FROM S
+  WHERE (SELL as msft; BUY as oracle; BUY as csco; SELL as amat)
+  FILTER msft[name = 'MSFT'] AND oracle[name = 'ORCL'] AND csco[name = 'CSCO'] AND amat[name = 'AMAT']
+  WITHIN 10000 [stock_time]
+  CONSUME BY ANY
+
+
+Quarantine fixed time:
+  CREATE QUARANTINE {
+  FIXED_TIME 5 seconds {S}
+  }
+
+
+🦠 Quarantine Results:
+📥 Number of events RECEIVED by quarantine: 224473
+📤 Number of events SENT by quarantine:     224473
+🗑️  Number of events DROPPED by quarantine:  0
+🔍 Number of complex events found: 52163
+❌ NO REORDERING: Events sent in same order as received
+
+🔍 Results:
+Number of input events : 224473
+Number of results      : 52163
+Query execution time   : 2.58s
+Query throughput       : 20247.98 results/sec

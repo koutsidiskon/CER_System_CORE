@@ -60,11 +60,18 @@ int main(int argc, char** argv) {
 
     for (size_t i = 0; i < events_to_send.size(); i++) {
       ZoneScopedN("main::send_event");
-      if (i < times.size() && times[i].count() > 0) {
+      /*if (i < times.size() && times[i].count() > 0) {
         std::this_thread::sleep_for(times[i]);
-      }
+      }*/
       server.receive_stream({0, {events_to_send[i]}});
     }
+
+    while (!server.is_quarantine_empty()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::cout << "Waiting for quarantine to process events..." << std::endl;
+    }
+    std::cout << "All events processed by quarantine!" << std::endl;
+    
 
     return 0;
   }

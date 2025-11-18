@@ -42,6 +42,10 @@ class OfflineStreamsListener {
       backend.send_event_to_queries(stream.id, {std::move(event), logger});
     }
   }
+
+  bool is_quarantine_empty() const {
+    return backend.is_quarantine_empty();
+  }
 };
 
 }  // namespace CORE::Library::Components

@@ -132,6 +132,8 @@ class BasePolicy {
              query_id);
   }
 
+  virtual bool is_events_empty() = 0;
+
  protected:
   virtual void try_add_tuples_to_send_queue() = 0;
 

@@ -132,5 +132,9 @@ class Backend {
   void set_quarantine_policy(Module::Quarantine::QuarantinePolicy&& policy_type) {
     quarantine_manager.set_query_policy(std::move(policy_type));
   }
+
+  bool is_quarantine_empty() const {
+    return quarantine_manager.is_quarantine_empty();
+  }
 };
 }  // namespace CORE::Internal::Interface

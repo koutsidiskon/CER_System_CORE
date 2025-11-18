@@ -59,6 +59,10 @@ class OfflineServer {
     stream_listener.receive_stream(std::move(stream));
   }
 
+  bool is_quarantine_empty() const {
+    return stream_listener.is_quarantine_empty();
+  }
+
   ServerConfig& get_server_config() { return server_config; }
 };
 

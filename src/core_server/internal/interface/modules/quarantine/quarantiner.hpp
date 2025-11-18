@@ -121,6 +121,15 @@ class QuarantineManager {
     }
   }
 
+  bool is_quarantine_empty() const {
+    for (const auto& [stream_type_ids, policy] : query_policies) {
+        if (!policy->is_events_empty()) {
+            return false;
+        }
+    }
+    return true;
+  }
+
  private:
   std::unique_ptr<BasePolicy> create_policy(QuarantinePolicy quarantine_policy) {
     switch (quarantine_policy.policy_type) {

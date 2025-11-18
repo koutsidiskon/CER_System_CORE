@@ -9,10 +9,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "direct"
 BUILD = (sys.argv[2].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/stocks/queries/other-q2_any.txt"
-DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/unordered_stocks/declaration.core"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/unordered_stocks/stock_data.csv"
-OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/unordered_stocks/quarantine_declaration.core"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/maritime/q3.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/maritime/maritime.core"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/maritime/1M.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/maritime/quarantine2.core"
 
 # Support flag-style --options or -o anywhere on the command line. This
 # preserves the existing positional behavior (6th arg) but allows callers
@@ -86,8 +86,14 @@ def run_test(description, cmd, query_contents, options_contents=None):
         result_log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_wait.log"), "w")
 
     for line in result.stdout.splitlines():
-        if line.startswith('[') and options_contents is None:
-            log_file.write(f"{line.split(') )')[0]}" + ") )\n")
+        if options_contents is None:
+            if line.startswith('['):
+                log_file.write(f"{line.split(') )')[0]}" + ") )\n")
+            if line.startswith("Drops: "):
+                match = re.search(r"(\d+)", line)  # Just look for numbers
+                if match:
+                    drops = int(match.group(1))
+            log_file.write(f"{line}\n")
         elif options_contents is not None:
             if line.startswith("STREAMING"):
                 quarantine_file.write(f"\n{line}\n")
@@ -110,7 +116,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
     
     if options_contents is None:
         num_results = sum(1 for line in result.stdout.splitlines() if line.strip().startswith('['))
-        return num_results, elapsed_time
+        return num_results, elapsed_time, drops
     
     received_order, sent_order, complex_events = extract_events(result.stdout)
     print("\n🦠 Quarantine Results:")
@@ -145,9 +151,10 @@ if __name__ == "__main__":
 
     if MODE == "direct":
         cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
-        num_results, core_time = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
+        num_results, core_time, drops = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
         print("\n🔍 Results:")
         print(f"Number of input events : {count_events(CSV_PATH)}")
+        print(f"Number of unordered events that dropped: {drops}")
         print(f"Number of results      : {num_results}")
         print(f"Query execution time   : {core_time:.2f}s")
         print(f"Query throughput       : {num_results / core_time:.2f} results/sec")
@@ -164,7 +171,7 @@ if __name__ == "__main__":
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
         
         print("\nRunning DIRECT policy (no quarantine)…")
-        num_results_direct, core_time = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
+        num_results_direct, core_time, drops_direct = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
         print(f"Query execution time   : {core_time:.2f}s")
         print(f"Query throughput       : {num_results_direct / core_time:.2f} results/sec")
         

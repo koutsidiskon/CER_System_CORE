@@ -153,6 +153,11 @@ class BoundedWaitTimePolicy : public BasePolicy {
            && "Event was not added to events in BoundedWaitTimePolicy::receive_event");
   }
 
+  bool is_events_empty() override {
+    std::lock_guard<std::mutex> lock(events_lock);
+    return events.empty();
+  }
+
  protected:
   /**
    * Tries to add received tuples to send queue according to specific policy

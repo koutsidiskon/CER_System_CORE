@@ -9,10 +9,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "direct"
 BUILD = (sys.argv[2].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/maritime/q3.txt"
-DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/maritime/maritime.core"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/maritime/1M.csv"
-OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/maritime/quarantine2.core"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/unordered_stocks/queries/other-q2_any.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/unordered_stocks/declaration.core"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/unordered_stocks/test.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/unordered_stocks/quarantine_declaration.core"
 
 # Support flag-style --options or -o anywhere on the command line. This
 # preserves the existing positional behavior (6th arg) but allows callers
@@ -93,7 +93,6 @@ def run_test(description, cmd, query_contents, options_contents=None):
                 match = re.search(r"(\d+)", line)  # Just look for numbers
                 if match:
                     drops = int(match.group(1))
-            log_file.write(f"{line}\n")
         elif options_contents is not None:
             if line.startswith("STREAMING"):
                 quarantine_file.write(f"\n{line}\n")

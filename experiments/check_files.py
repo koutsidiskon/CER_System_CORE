@@ -58,8 +58,8 @@ def compare_lines_anywhere(file1, file2):
 
 # Example usage
 if __name__ == "__main__":
-    file1 = "../logs/logfile_experiment_direct.log"
-    file2 = "../logs/logfile_experiment_wait.log"
+    file1 = "../src/targets/experiments/maritime/1M_sorted.csv"
+    file2 = "../src/targets/experiments/maritime/1M.csv"
     #compare_csv_files(file1, file2)
     compare_lines_anywhere(file1, file2)
 

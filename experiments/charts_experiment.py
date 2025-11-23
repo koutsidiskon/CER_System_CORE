@@ -10,10 +10,12 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 BUILD = (sys.argv[1].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[2] if len(sys.argv) > 3 else "src/targets/experiments/maritime/q1.txt"
-DECL = sys.argv[3] if len(sys.argv) > 4 else "src/targets/experiments/maritime/maritime.core"
-CSV = sys.argv[4] if len(sys.argv) > 5 else "src/targets/experiments/maritime/CSV/1M.csv"
-OPTIONS = sys.argv[5] if len(sys.argv) > 6 else "src/targets/experiments/maritime/quarantine2.core"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/unordered_stocks/queries/other-q2_any.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/unordered_stocks/declaration.core"
+CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/stocks/stock_data.csv"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/unordered_stocks/test.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/unordered_stocks/quarantine_declaration.core"
+
 
 DIR = "Debug" if BUILD == "debug" else "Release"
 MOUNT_FLAGS = ["-v", f"{PROJECT_ROOT}:/workspace", "-w", "/workspace"]
@@ -24,7 +26,7 @@ IMG_LOCAL = "core-dev"
 CSV_PATH = os.path.join(PROJECT_ROOT, CSV)
 QUERY_PATH = os.path.join(PROJECT_ROOT, QUERY)
 OPTIONS_PATH = os.path.join(PROJECT_ROOT, OPTIONS)
-CMD_WITHOUT_QUARANTINE = [f"/CORE/build/{DIR}/offline", "--query", f"/workspace/{QUERY}", "--declaration", f"/workspace/{DECL}", "--csv", f"/workspace/{CSV}"]
+CMD_WITHOUT_QUARANTINE = [f"/CORE/build/{DIR}/offline", "--query", f"/workspace/{QUERY}", "--declaration", f"/workspace/{DECL}", "--csv", f"/workspace/{CSV_ORDERED}"]
 CMD_WITH_QUARANTINE = [f"/CORE/build/{DIR}/offline", "--query", f"/workspace/{QUERY}", "--declaration", f"/workspace/{DECL}", "--csv", f"/workspace/{CSV}", "--options", f"/workspace/{OPTIONS}"]
 
 def count_events(csv_path):
@@ -57,12 +59,6 @@ def extract_events(output):
     return received_order, sent_order, complex_events
 
 def run_test(description, cmd, query_contents, options_contents=None):
-    '''print(f"\n{'='*60}")
-    print(f"🔬 {description}")
-    print(f"{'='*60}")
-    print("➜", " ".join(shlex.quote(a) for a in cmd))
-    print("\nQuery:\n  " + query_contents)'''
-    
     drops = 0
     received = 0
     sent = 0
@@ -74,7 +70,6 @@ def run_test(description, cmd, query_contents, options_contents=None):
     if options_contents is None:
         log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_direct.log"), "w")
     elif options_contents is not None:
-        #print("\nQuarantine fixed time:\n  " + options_contents)
         quarantine_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_quarantine.log"), "w")
         result_log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_wait.log"), "w")
 
@@ -166,29 +161,18 @@ if __name__ == "__main__":
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
         
         directPolicy = []
-        #print("\nRunning DIRECT policy (no quarantine)…")
         num_results_direct, core_time = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
-        #print(f"Query execution time   : {core_time:.2f}s")
-        #print(f"Query throughput       : {num_results_direct / core_time:.2f} results/sec")
         directPolicy.append(round(core_time,2))
         directPolicy.append(round((num_results_direct / core_time),2))
         directPolicy.append(num_results_direct)
         directPolicy.append(0)
         direct_results.append(directPolicy)
 
-        #print("\nRunning WAIT quarantine policy…")
         received_wait, sent_wait, events_wait, core_time, drops = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
-        #print(f"Query execution time   : {core_time:.2f}s")
-        #print(f"Query throughput       : {len(events_wait) / core_time:.2f} results/sec")
         execution_time.append(round(core_time,2))
         throughput.append(round((num_results_direct / core_time),2))
         numOfResults.append(len(events_wait))
         numOfDrops.append(drops)
-        
-        '''print("\n🔍 Comparison Results:")
-        print(f"Number of input events         : {count_events(CSV_PATH)}")
-        print(f"Number of results (DIRECT)     : {num_results_direct}")
-        print(f"Number of results (WAIT)       : {len(events_wait)}")'''
     
     direct_averages = [round(sum(row[i] for row in direct_results) / len(direct_results), 2) 
             for i in range(len(results_labels))]

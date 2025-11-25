@@ -7,7 +7,7 @@
 
 namespace CORE::Internal::Interface::Module::Quarantine {
 struct QuarantinePolicy {
-  enum QuarantinePolicyType { DirectPolicy, WaitFixedTimePolicy, BoundedWaitTimePolicy };
+  enum QuarantinePolicyType { DirectPolicy, WaitFixedTimePolicy, BoundedWaitTimePolicy, MaxDelayPolicy };
 
   QuarantinePolicyType policy_type;
   std::set<std::string> streams;

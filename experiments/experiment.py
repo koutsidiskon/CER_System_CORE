@@ -9,10 +9,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "direct"
 BUILD = (sys.argv[2].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/unordered_stocks/queries/other-q2_any.txt"
-DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/unordered_stocks/declaration.core"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/unordered_stocks/test.csv"
-OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/unordered_stocks/quarantine_declaration.core"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/fires/q1.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/fires/fires.core"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/Fire_department_4depts.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/fires/fire_quarantine.core"
 
 # Support flag-style --options or -o anywhere on the command line. This
 # preserves the existing positional behavior (6th arg) but allows callers

@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <fstream>
 #include <mutex>
+#include <optional>
 #include <ratio>
 #include <set>
 #include <string>
@@ -30,6 +31,8 @@ class MaxDelayPolicy: public BasePolicy {
   int drops = 0;
   int received_events = 0;
   int sent_events = 0;  
+  std::optional<int64_t> last_received_event_time;
+  bool end_of_stream_received = false;
 
   // Corresponds to the last time an event was sent
   Types::IntValue last_time_sent = Types::IntValue::create_lower_bound();
@@ -84,19 +87,8 @@ class MaxDelayPolicy: public BasePolicy {
     std::lock_guard<std::mutex> lock(events_lock);
 
 
-    // std::chrono::time_point<std::chrono::system_clock>
-    //   now = std::chrono::system_clock::now();
-    //
-    // std::chrono::duration<int64_t, std::nano> duration_since_last_save = now - last_save;
-    // if (std::chrono::duration_cast<std::chrono::minutes>(duration_since_last_save).count()
-    //     >= 15) {
-    //   std::cout << "Saving events to disk in WaitFixedTimePolicy" << std::endl;
-    //   save_events_to_disk();
-    //   last_save = now;
-    // }
-    auto delay_ns = std::chrono::seconds(event.get_attribute_at_index<Types::IntValue>(5).val);
 
-    if (event.get_primary_time().val < last_time_sent.val || delay_ns > time_to_wait) {
+    if (event.get_primary_time().val < last_time_sent.val) {
       drops++;
       LOG_WARNING(logger,
                   "Dropping event with id {} and time {} in "
@@ -106,11 +98,23 @@ class MaxDelayPolicy: public BasePolicy {
                   event.get_primary_time().val);
       return;
     }
+    last_received_event_time = event.get_attribute_at_index<Types::IntValue>(1).val;
     events.insert(std::move(event));
+    std::cout << "Last received event time: " << last_received_event_time.value() << std::endl;
+    std::cout << "received" << std::endl;
+    try_add_tuples_to_send_queue();
+    std::cout << "telos" << std::endl;
   }
 
   bool is_events_empty() override {
     std::lock_guard<std::mutex> lock(events_lock);
+    for (auto iter = events.begin(); iter != events.end();) {
+      
+      sent_events++;
+      auto internal_node = events.extract(iter++);
+      this->send_event_queue.enqueue(std::move(internal_node.value()));
+    }
+    end_of_stream_received = true;
     return events.empty();
   }
 
@@ -118,60 +122,50 @@ class MaxDelayPolicy: public BasePolicy {
   /**
    * Tries to add received tuples to send queue according to specific policy
    */
-  // Threshold for the number of events to process at once
-  static constexpr size_t BATCH_SIZE = 2000;
-
   void try_add_tuples_to_send_queue() override {
+    std::cout << "tuples" << std::endl;
     LOG_TRACE_L3(logger,
-                "Trying to add tuples to send queue in "
-                "MaxDelayPolicy::try_add_tuples_to_send");
+                 "Trying to add tuples to send queue in "
+                 "MaxDelayPolicy::try_add_tuples_to_send");
 
-    std::lock_guard<std::mutex> lock(events_lock);
-    size_t current_size = events.size();
+    //std::lock_guard<std::mutex> lock(events_lock);
     
-    if (current_size < BATCH_SIZE) {
-        return;  // Not enough events to process
-    }
-
-    // Process all available events in batches of BATCH_SIZE
-    while (!events.empty()) {
-        size_t to_process = std::min(BATCH_SIZE, events.size());
-        size_t processed = 0;
-        auto iter = events.begin();
-        
-        LOG_TRACE_L1(logger, "Processing batch of {} events (remaining: {})", 
-                    to_process, events.size());
-
-        while (iter != events.end() && processed < to_process) {
-            const Types::EventWrapper& event = *iter;
-            auto next_iter = std::next(iter);  // Get next before modifying container
-            
-            sent_events++;
-            LOG_TRACE_L2(logger,
-                        "Adding event with id {} and time {} to send queue",
-                        event.get_unique_event_type_id(),
-                        event.get_primary_time().val);
-            
-            assert(event.get_primary_time().val >= last_time_sent.val
-                  && "Event time is not after last time sent");
-            
-            auto internal_node = events.extract(iter);
-            last_time_sent = internal_node.value().get_primary_time();
-            this->send_event_queue.enqueue(std::move(internal_node.value()));
-            
-            processed++;
-            iter = next_iter;
-        }
+    for (auto iter = events.begin(); iter != events.end();) {
+      std::cout << "For" << std::endl;
+      const Types::EventWrapper& event = *iter;
+      auto event_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
+      // Calculate delay using event timestamps
+      auto duration = std::chrono::nanoseconds(last_received_event_time.value() * 1000000000LL) - std::chrono::nanoseconds(event_time * 1000000000LL);
+      std::cout << "Duration: " << duration.count() << std::endl;
+      std::cout << "Time to wait: " << time_to_wait.count() << std::endl;
+      if ((duration > time_to_wait) || (end_of_stream_received)){
+        std::cout << "IF" << std::endl;
+        sent_events++;
+        LOG_TRACE_L1(logger,
+                     "Adding event with id {} and time {} to send queue in "
+                     "MaxDelayPolicy::try_add_tuples_to_send",
+                     event.get_unique_event_type_id(),
+                     event.get_primary_time().val);
+        assert(event.get_primary_time().val >= last_time_sent.val
+               && "Event time is not after last time sent");
+        auto internal_node = events.extract(iter++);
+        last_time_sent = internal_node.value().get_primary_time();
+        this->send_event_queue.enqueue(std::move(internal_node.value()));
+      } else {
+        // If we couldn't remove the first event, stop trying
+        return;
+      }
     }
   }
 
   void force_add_tuples_to_send_queue() override {
-    std::lock_guard<std::mutex> lock(events_lock);
-    for (auto iter = events.begin(); iter != events.end();) {
+    //std::lock_guard<std::mutex> lock(events_lock);
+    /*for (auto iter = events.begin(); iter != events.end();) {
+      
       sent_events++;
       auto internal_node = events.extract(iter++);
       this->send_event_queue.enqueue(std::move(internal_node.value()));
-    }
+    }*/
     std::cout << "Number of events RECEIVED by quarantine: " << received_events << std::endl;
     std::cout << "Number of events SENT by quarantine: " << sent_events << std::endl;
     std::cout << "Number of events DROPPED by quarantine: " << drops << std::endl;

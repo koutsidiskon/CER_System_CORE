@@ -100,30 +100,26 @@ class MaxDelayPolicy: public BasePolicy {
     }
     last_received_event_time = event.get_attribute_at_index<Types::IntValue>(1).val;
     events.insert(std::move(event));
-    std::cout << "Last received event time: " << last_received_event_time.value() << std::endl;
-    std::cout << "received" << std::endl;
     try_add_tuples_to_send_queue();
-    std::cout << "telos" << std::endl;
   }
 
   bool is_events_empty() override {
     std::lock_guard<std::mutex> lock(events_lock);
-    for (auto iter = events.begin(); iter != events.end();) {
-      
-      sent_events++;
-      auto internal_node = events.extract(iter++);
-      this->send_event_queue.enqueue(std::move(internal_node.value()));
+    while (!events.empty()) {
+        auto iter = events.begin();
+        sent_events++;
+        auto internal_node = events.extract(iter);
+        this->send_event_queue.enqueue(std::move(internal_node.value()));
     }
     end_of_stream_received = true;
-    return events.empty();
-  }
+    return true;
+}
 
  protected:
   /**
    * Tries to add received tuples to send queue according to specific policy
    */
   void try_add_tuples_to_send_queue() override {
-    std::cout << "tuples" << std::endl;
     LOG_TRACE_L3(logger,
                  "Trying to add tuples to send queue in "
                  "MaxDelayPolicy::try_add_tuples_to_send");
@@ -131,15 +127,11 @@ class MaxDelayPolicy: public BasePolicy {
     //std::lock_guard<std::mutex> lock(events_lock);
     
     for (auto iter = events.begin(); iter != events.end();) {
-      std::cout << "For" << std::endl;
       const Types::EventWrapper& event = *iter;
       auto event_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
       // Calculate delay using event timestamps
       auto duration = std::chrono::nanoseconds(last_received_event_time.value() * 1000000000LL) - std::chrono::nanoseconds(event_time * 1000000000LL);
-      std::cout << "Duration: " << duration.count() << std::endl;
-      std::cout << "Time to wait: " << time_to_wait.count() << std::endl;
       if ((duration > time_to_wait) || (end_of_stream_received)){
-        std::cout << "IF" << std::endl;
         sent_events++;
         LOG_TRACE_L1(logger,
                      "Adding event with id {} and time {} to send queue in "

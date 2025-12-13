@@ -43,6 +43,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitDynamic_time_policy(OptionDeclarationParser::Dynamic_time_policyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitStream_names(OptionDeclarationParser::Stream_namesContext *ctx) override {
     return visitChildren(ctx);
   }

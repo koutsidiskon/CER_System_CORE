@@ -48,48 +48,51 @@ void optiondeclarationparserParserInitialize() {
       "any_name", "number", "integer", "double"
     },
     std::vector<std::string>{
-      "", "", "", "", "", "", "", "", "", "", "", "'{'", "'}'", "','"
+      "", "", "", "", "", "", "", "", "", "", "", "", "'{'", "'}'", "','"
     },
     std::vector<std::string>{
       "", "WS", "K_CREATE", "K_QUARANTINE", "K_FIXED_TIME", "K_MAX_DELAY", 
-      "K_BOUNDED_TIME", "K_DIRECT", "K_HOURS", "K_MINUTES", "K_SECONDS", 
-      "LEFT_CURLY_BRACKET", "RIGHT_CURLY_BRACKET", "COMMA", "DOUBLE_LITERAL", 
-      "INTEGER_LITERAL", "NUMERICAL_EXPONENT", "IDENTIFIER", "UNEXPECTED_CHAR"
+      "K_BOUNDED_TIME", "K_DYNAMIC_TIME", "K_DIRECT", "K_HOURS", "K_MINUTES", 
+      "K_SECONDS", "LEFT_CURLY_BRACKET", "RIGHT_CURLY_BRACKET", "COMMA", 
+      "DOUBLE_LITERAL", "INTEGER_LITERAL", "NUMERICAL_EXPONENT", "IDENTIFIER", 
+      "UNEXPECTED_CHAR"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,18,115,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,19,121,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,1,0,1,0,
   	5,0,31,8,0,10,0,12,0,34,9,0,1,0,1,0,1,1,1,1,1,1,1,2,1,2,1,2,1,2,5,2,45,
   	8,2,10,2,12,2,48,9,2,1,2,1,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,
-  	1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,75,8,3,1,4,1,
-  	4,1,4,5,4,80,8,4,10,4,12,4,83,9,4,1,5,3,5,86,8,5,1,5,3,5,89,8,5,1,5,3,
-  	5,92,8,5,1,6,1,6,1,6,1,7,1,7,1,7,1,8,1,8,1,8,1,9,1,9,1,10,1,10,1,11,1,
-  	11,3,11,109,8,11,1,12,1,12,1,13,1,13,1,13,0,0,14,0,2,4,6,8,10,12,14,16,
-  	18,20,22,24,26,0,0,111,0,32,1,0,0,0,2,37,1,0,0,0,4,40,1,0,0,0,6,74,1,
-  	0,0,0,8,76,1,0,0,0,10,85,1,0,0,0,12,93,1,0,0,0,14,96,1,0,0,0,16,99,1,
-  	0,0,0,18,102,1,0,0,0,20,104,1,0,0,0,22,108,1,0,0,0,24,110,1,0,0,0,26,
-  	112,1,0,0,0,28,31,3,4,2,0,29,31,3,2,1,0,30,28,1,0,0,0,30,29,1,0,0,0,31,
-  	34,1,0,0,0,32,30,1,0,0,0,32,33,1,0,0,0,33,35,1,0,0,0,34,32,1,0,0,0,35,
-  	36,5,0,0,1,36,1,1,0,0,0,37,38,5,18,0,0,38,39,6,1,-1,0,39,3,1,0,0,0,40,
-  	41,5,2,0,0,41,42,5,3,0,0,42,46,5,11,0,0,43,45,3,6,3,0,44,43,1,0,0,0,45,
-  	48,1,0,0,0,46,44,1,0,0,0,46,47,1,0,0,0,47,49,1,0,0,0,48,46,1,0,0,0,49,
-  	50,5,12,0,0,50,5,1,0,0,0,51,52,5,4,0,0,52,53,3,10,5,0,53,54,5,11,0,0,
-  	54,55,3,8,4,0,55,56,5,12,0,0,56,75,1,0,0,0,57,58,5,6,0,0,58,59,3,10,5,
-  	0,59,60,5,11,0,0,60,61,3,8,4,0,61,62,5,12,0,0,62,75,1,0,0,0,63,64,5,7,
-  	0,0,64,65,5,11,0,0,65,66,3,8,4,0,66,67,5,12,0,0,67,75,1,0,0,0,68,69,5,
-  	5,0,0,69,70,3,10,5,0,70,71,5,11,0,0,71,72,3,8,4,0,72,73,5,12,0,0,73,75,
-  	1,0,0,0,74,51,1,0,0,0,74,57,1,0,0,0,74,63,1,0,0,0,74,68,1,0,0,0,75,7,
-  	1,0,0,0,76,81,3,18,9,0,77,78,5,13,0,0,78,80,3,18,9,0,79,77,1,0,0,0,80,
-  	83,1,0,0,0,81,79,1,0,0,0,81,82,1,0,0,0,82,9,1,0,0,0,83,81,1,0,0,0,84,
-  	86,3,12,6,0,85,84,1,0,0,0,85,86,1,0,0,0,86,88,1,0,0,0,87,89,3,14,7,0,
-  	88,87,1,0,0,0,88,89,1,0,0,0,89,91,1,0,0,0,90,92,3,16,8,0,91,90,1,0,0,
-  	0,91,92,1,0,0,0,92,11,1,0,0,0,93,94,3,24,12,0,94,95,5,8,0,0,95,13,1,0,
-  	0,0,96,97,3,24,12,0,97,98,5,9,0,0,98,15,1,0,0,0,99,100,3,24,12,0,100,
-  	101,5,10,0,0,101,17,1,0,0,0,102,103,3,20,10,0,103,19,1,0,0,0,104,105,
-  	5,17,0,0,105,21,1,0,0,0,106,109,3,24,12,0,107,109,3,26,13,0,108,106,1,
-  	0,0,0,108,107,1,0,0,0,109,23,1,0,0,0,110,111,5,15,0,0,111,25,1,0,0,0,
-  	112,113,5,14,0,0,113,27,1,0,0,0,9,30,32,46,74,81,85,88,91,108
+  	1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,
+  	3,1,3,3,3,81,8,3,1,4,1,4,1,4,5,4,86,8,4,10,4,12,4,89,9,4,1,5,3,5,92,8,
+  	5,1,5,3,5,95,8,5,1,5,3,5,98,8,5,1,6,1,6,1,6,1,7,1,7,1,7,1,8,1,8,1,8,1,
+  	9,1,9,1,10,1,10,1,11,1,11,3,11,115,8,11,1,12,1,12,1,13,1,13,1,13,0,0,
+  	14,0,2,4,6,8,10,12,14,16,18,20,22,24,26,0,0,118,0,32,1,0,0,0,2,37,1,0,
+  	0,0,4,40,1,0,0,0,6,80,1,0,0,0,8,82,1,0,0,0,10,91,1,0,0,0,12,99,1,0,0,
+  	0,14,102,1,0,0,0,16,105,1,0,0,0,18,108,1,0,0,0,20,110,1,0,0,0,22,114,
+  	1,0,0,0,24,116,1,0,0,0,26,118,1,0,0,0,28,31,3,4,2,0,29,31,3,2,1,0,30,
+  	28,1,0,0,0,30,29,1,0,0,0,31,34,1,0,0,0,32,30,1,0,0,0,32,33,1,0,0,0,33,
+  	35,1,0,0,0,34,32,1,0,0,0,35,36,5,0,0,1,36,1,1,0,0,0,37,38,5,19,0,0,38,
+  	39,6,1,-1,0,39,3,1,0,0,0,40,41,5,2,0,0,41,42,5,3,0,0,42,46,5,12,0,0,43,
+  	45,3,6,3,0,44,43,1,0,0,0,45,48,1,0,0,0,46,44,1,0,0,0,46,47,1,0,0,0,47,
+  	49,1,0,0,0,48,46,1,0,0,0,49,50,5,13,0,0,50,5,1,0,0,0,51,52,5,4,0,0,52,
+  	53,3,10,5,0,53,54,5,12,0,0,54,55,3,8,4,0,55,56,5,13,0,0,56,81,1,0,0,0,
+  	57,58,5,6,0,0,58,59,3,10,5,0,59,60,5,12,0,0,60,61,3,8,4,0,61,62,5,13,
+  	0,0,62,81,1,0,0,0,63,64,5,8,0,0,64,65,5,12,0,0,65,66,3,8,4,0,66,67,5,
+  	13,0,0,67,81,1,0,0,0,68,69,5,5,0,0,69,70,3,10,5,0,70,71,5,12,0,0,71,72,
+  	3,8,4,0,72,73,5,13,0,0,73,81,1,0,0,0,74,75,5,7,0,0,75,76,3,10,5,0,76,
+  	77,5,12,0,0,77,78,3,8,4,0,78,79,5,13,0,0,79,81,1,0,0,0,80,51,1,0,0,0,
+  	80,57,1,0,0,0,80,63,1,0,0,0,80,68,1,0,0,0,80,74,1,0,0,0,81,7,1,0,0,0,
+  	82,87,3,18,9,0,83,84,5,14,0,0,84,86,3,18,9,0,85,83,1,0,0,0,86,89,1,0,
+  	0,0,87,85,1,0,0,0,87,88,1,0,0,0,88,9,1,0,0,0,89,87,1,0,0,0,90,92,3,12,
+  	6,0,91,90,1,0,0,0,91,92,1,0,0,0,92,94,1,0,0,0,93,95,3,14,7,0,94,93,1,
+  	0,0,0,94,95,1,0,0,0,95,97,1,0,0,0,96,98,3,16,8,0,97,96,1,0,0,0,97,98,
+  	1,0,0,0,98,11,1,0,0,0,99,100,3,24,12,0,100,101,5,9,0,0,101,13,1,0,0,0,
+  	102,103,3,24,12,0,103,104,5,10,0,0,104,15,1,0,0,0,105,106,3,24,12,0,106,
+  	107,5,11,0,0,107,17,1,0,0,0,108,109,3,20,10,0,109,19,1,0,0,0,110,111,
+  	5,18,0,0,111,21,1,0,0,0,112,115,3,24,12,0,113,115,3,26,13,0,114,112,1,
+  	0,0,0,114,113,1,0,0,0,115,23,1,0,0,0,116,117,5,16,0,0,117,25,1,0,0,0,
+  	118,119,5,15,0,0,119,27,1,0,0,0,9,30,32,46,80,87,91,94,97,114
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -351,7 +354,7 @@ OptionDeclarationParser::Option_declarationContext* OptionDeclarationParser::opt
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 240) != 0)) {
+      ((1ULL << _la) & 496) != 0)) {
       setState(43);
       quarantine_policy();
       setState(48);
@@ -506,6 +509,37 @@ std::any OptionDeclarationParser::Fixed_time_policyContext::accept(tree::ParseTr
   else
     return visitor->visitChildren(this);
 }
+//----------------- Dynamic_time_policyContext ------------------------------------------------------------------
+
+tree::TerminalNode* OptionDeclarationParser::Dynamic_time_policyContext::K_DYNAMIC_TIME() {
+  return getToken(OptionDeclarationParser::K_DYNAMIC_TIME, 0);
+}
+
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Dynamic_time_policyContext::time_span() {
+  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Dynamic_time_policyContext::stream_names() {
+  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Dynamic_time_policyContext::Dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+
+
+std::any OptionDeclarationParser::Dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
+    return parserVisitor->visitDynamic_time_policy(this);
+  else
+    return visitor->visitChildren(this);
+}
 OptionDeclarationParser::Quarantine_policyContext* OptionDeclarationParser::quarantine_policy() {
   Quarantine_policyContext *_localctx = _tracker.createInstance<Quarantine_policyContext>(_ctx, getState());
   enterRule(_localctx, 6, OptionDeclarationParser::RuleQuarantine_policy);
@@ -518,7 +552,7 @@ OptionDeclarationParser::Quarantine_policyContext* OptionDeclarationParser::quar
     exitRule();
   });
   try {
-    setState(74);
+    setState(80);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case OptionDeclarationParser::K_FIXED_TIME: {
@@ -579,6 +613,22 @@ OptionDeclarationParser::Quarantine_policyContext* OptionDeclarationParser::quar
         setState(71);
         stream_names();
         setState(72);
+        match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
+        break;
+      }
+
+      case OptionDeclarationParser::K_DYNAMIC_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::Dynamic_time_policyContext>(_localctx);
+        enterOuterAlt(_localctx, 5);
+        setState(74);
+        match(OptionDeclarationParser::K_DYNAMIC_TIME);
+        setState(75);
+        time_span();
+        setState(76);
+        match(OptionDeclarationParser::LEFT_CURLY_BRACKET);
+        setState(77);
+        stream_names();
+        setState(78);
         match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
         break;
       }
@@ -646,17 +696,17 @@ OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::stream_na
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(76);
+    setState(82);
     stream_name();
-    setState(81);
+    setState(87);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == OptionDeclarationParser::COMMA) {
-      setState(77);
-      match(OptionDeclarationParser::COMMA);
-      setState(78);
-      stream_name();
       setState(83);
+      match(OptionDeclarationParser::COMMA);
+      setState(84);
+      stream_name();
+      setState(89);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -716,12 +766,12 @@ OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::time_span() 
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(85);
+    setState(91);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 5, _ctx)) {
     case 1: {
-      setState(84);
+      setState(90);
       hour_span();
       break;
     }
@@ -729,12 +779,12 @@ OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::time_span() 
     default:
       break;
     }
-    setState(88);
+    setState(94);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx)) {
     case 1: {
-      setState(87);
+      setState(93);
       minute_span();
       break;
     }
@@ -742,12 +792,12 @@ OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::time_span() 
     default:
       break;
     }
-    setState(91);
+    setState(97);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == OptionDeclarationParser::INTEGER_LITERAL) {
-      setState(90);
+      setState(96);
       second_span();
     }
    
@@ -801,9 +851,9 @@ OptionDeclarationParser::Hour_spanContext* OptionDeclarationParser::hour_span() 
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(93);
+    setState(99);
     integer();
-    setState(94);
+    setState(100);
     match(OptionDeclarationParser::K_HOURS);
    
   }
@@ -856,9 +906,9 @@ OptionDeclarationParser::Minute_spanContext* OptionDeclarationParser::minute_spa
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(96);
+    setState(102);
     integer();
-    setState(97);
+    setState(103);
     match(OptionDeclarationParser::K_MINUTES);
    
   }
@@ -911,9 +961,9 @@ OptionDeclarationParser::Second_spanContext* OptionDeclarationParser::second_spa
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(99);
+    setState(105);
     integer();
-    setState(100);
+    setState(106);
     match(OptionDeclarationParser::K_SECONDS);
    
   }
@@ -962,7 +1012,7 @@ OptionDeclarationParser::Stream_nameContext* OptionDeclarationParser::stream_nam
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(102);
+    setState(108);
     any_name();
    
   }
@@ -1011,7 +1061,7 @@ OptionDeclarationParser::Any_nameContext* OptionDeclarationParser::any_name() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(104);
+    setState(110);
     match(OptionDeclarationParser::IDENTIFIER);
    
   }
@@ -1063,19 +1113,19 @@ OptionDeclarationParser::NumberContext* OptionDeclarationParser::number() {
     exitRule();
   });
   try {
-    setState(108);
+    setState(114);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case OptionDeclarationParser::INTEGER_LITERAL: {
         enterOuterAlt(_localctx, 1);
-        setState(106);
+        setState(112);
         integer();
         break;
       }
 
       case OptionDeclarationParser::DOUBLE_LITERAL: {
         enterOuterAlt(_localctx, 2);
-        setState(107);
+        setState(113);
         double_();
         break;
       }
@@ -1130,7 +1180,7 @@ OptionDeclarationParser::IntegerContext* OptionDeclarationParser::integer() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(110);
+    setState(116);
     match(OptionDeclarationParser::INTEGER_LITERAL);
    
   }
@@ -1179,7 +1229,7 @@ OptionDeclarationParser::DoubleContext* OptionDeclarationParser::double_() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(112);
+    setState(118);
     match(OptionDeclarationParser::DOUBLE_LITERAL);
    
   }

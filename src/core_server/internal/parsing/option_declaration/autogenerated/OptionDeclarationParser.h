@@ -13,9 +13,10 @@ class  OptionDeclarationParser : public antlr4::Parser {
 public:
   enum {
     WS = 1, K_CREATE = 2, K_QUARANTINE = 3, K_FIXED_TIME = 4, K_MAX_DELAY = 5, 
-    K_BOUNDED_TIME = 6, K_DIRECT = 7, K_HOURS = 8, K_MINUTES = 9, K_SECONDS = 10, 
-    LEFT_CURLY_BRACKET = 11, RIGHT_CURLY_BRACKET = 12, COMMA = 13, DOUBLE_LITERAL = 14, 
-    INTEGER_LITERAL = 15, NUMERICAL_EXPONENT = 16, IDENTIFIER = 17, UNEXPECTED_CHAR = 18
+    K_BOUNDED_TIME = 6, K_DYNAMIC_TIME = 7, K_DIRECT = 8, K_HOURS = 9, K_MINUTES = 10, 
+    K_SECONDS = 11, LEFT_CURLY_BRACKET = 12, RIGHT_CURLY_BRACKET = 13, COMMA = 14, 
+    DOUBLE_LITERAL = 15, INTEGER_LITERAL = 16, NUMERICAL_EXPONENT = 17, 
+    IDENTIFIER = 18, UNEXPECTED_CHAR = 19
   };
 
   enum {
@@ -162,6 +163,19 @@ public:
     Fixed_time_policyContext(Quarantine_policyContext *ctx);
 
     antlr4::tree::TerminalNode *K_FIXED_TIME();
+    Time_spanContext *time_span();
+    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
+    Stream_namesContext *stream_names();
+    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Dynamic_time_policyContext : public Quarantine_policyContext {
+  public:
+    Dynamic_time_policyContext(Quarantine_policyContext *ctx);
+
+    antlr4::tree::TerminalNode *K_DYNAMIC_TIME();
     Time_spanContext *time_span();
     antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
     Stream_namesContext *stream_names();

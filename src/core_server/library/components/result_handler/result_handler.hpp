@@ -69,55 +69,61 @@ class ResultHandler {
 };
 
 class OfflineResultHandler : public ResultHandler {
+ private:
+  std::vector<std::pair<uint64_t, uint64_t>> all_events;
+  size_t total_events = 0;
+  double total_delay = 0.0;
+
  public:
   OfflineResultHandler() : ResultHandler(ResultHandlerType::OFFLINE) {}
+
+  ~OfflineResultHandler() override {
+    // Print summary when handler is destroyed
+    if (!all_events.empty()) {
+      std::cout << "\n=== FINAL SUMMARY ===\n";
+      std::cout << "Total events processed: " << total_events << "\n";
+      std::cout << "Average delay: " << static_cast<uint64_t>(total_delay / total_events) << "ns\n";
+      std::cout << "====================\n";
+    }
+  }
 
   void handle_complex_event(
     std::optional<Internal::tECS::Enumerator>&& internal_enumerator) override {
     ZoneScopedN("OfflineResultHandler::handle_complex_event");
-    static std::vector<std::pair<uint64_t, uint64_t>> all_events;
-    static size_t total_events = 0;
-    static double total_delay = 0.0;
-    static bool summary_printed = false;
 
     if (!internal_enumerator.has_value()) {
-        // This is the actual end of processing
-        if (!summary_printed && !all_events.empty()) {
-            std::cout << "\n=== FINAL SUMMARY ===\n";
-            std::cout << "Total events processed: " << total_events << "\n";
-            std::cout << "Average delay: " << static_cast<uint64_t>(total_delay / total_events) << "µs\n";
-            std::cout << "====================\n";
-            summary_printed = true;
-        }
+        // End of processing signal, but summary will be printed in destructor
         return;
     }
     
     auto& enumerator = internal_enumerator.value();
     const auto& detection_times = enumerator.get_detection_times();
     
-    // Process events
-    std::vector<std::string> event_strings;
+    // Process and print each event immediately to measure accurate delay
+    size_t event_index = 0;
     for (const auto& event : enumerator) {
-        event_strings.push_back(event.to_string<true>());
-    }
-    
-    // Record timing for this batch
-    for (size_t i = 0; i < event_strings.size() && i < detection_times.size(); i++) {
-        auto detection_time = detection_times[i];
-        auto print_time = std::chrono::duration_cast<std::chrono::microseconds>(
+        // Get print time immediately after enumeration of this event
+        auto print_time = std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         
-        uint64_t delay_us = (print_time - detection_time);
-        total_delay += delay_us;
+        // Convert to string
+        std::string event_string = event.to_string<true>();
+        
+        // Calculate delay for this specific event
+        auto detection_time = detection_times[event_index];
+        uint64_t delay_ns = (print_time - detection_time);
+        total_delay += delay_ns;
         all_events.emplace_back(detection_time, print_time);
         total_events++;
         
         // Print individual event details
         std::cout << "Event " << total_events << ":\n";
-        std::cout << "  Detected at: " << detection_time << "µs\n";
-        std::cout << "  Print time: " << print_time << "µs\n";
-        std::cout << "  Delay: " << delay_us << "µs\n";
-        std::cout << "  " << event_strings[i] << "\n\n";
+        std::cout << "  Detected at: " << detection_time << "ns\n";
+        std::cout << "  Print time: " << print_time << "ns\n";
+        std::cout << "  Delay: " << delay_ns << "ns\n";
+        std::cout << "  " << event_string << "\n\n";
+        
+        event_index++;
     }
   }
 

@@ -1,0 +1,6 @@
+CREATE STREAM S {
+EVENT CITY_OF_BRIDGEPORT_FIRE_DEPT { Event_Timestamp:primary_time, Arrival_Timestamp:int, Incident_Street_Address:string, Incident_City:string, Incident_Zip_Code:string},
+EVENT NEW_HAVEN_FIRE_DEPARTMENT { Event_Timestamp:primary_time, Arrival_Timestamp:int, Incident_Street_Address:string, Incident_City:string, Incident_Zip_Code:string},
+EVENT HARTFORD_FIRE_DEPARTMENT { Event_Timestamp:primary_time, Arrival_Timestamp:int, Incident_Street_Address:string, Incident_City:string, Incident_Zip_Code:string},
+EVENT WATERBURY_FIRE_DEPARTMENT { Event_Timestamp:primary_time, Arrival_Timestamp:int, Incident_Street_Address:string, Incident_City:string, Incident_Zip_Code:string}
+}

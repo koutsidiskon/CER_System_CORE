@@ -42,3 +42,7 @@ __pycache__
 logs
 expected_results/
 src/targets/experiments/maritime/1M.csv
+src/targets/experiments/maritime/1M_sorted.csv
+src/targets/experiments/maritime/1M_unsorted.csv
+src/targets/experiments/maritime/1M_unsorted2.csv
+src/targets/experiments/unordered_stocks/test.csv

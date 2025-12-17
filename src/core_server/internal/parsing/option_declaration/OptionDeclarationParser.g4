@@ -25,6 +25,8 @@ quarantine_policy
  : K_FIXED_TIME time_span LEFT_CURLY_BRACKET stream_names RIGHT_CURLY_BRACKET # fixed_time_policy
  | K_BOUNDED_TIME time_span LEFT_CURLY_BRACKET stream_names RIGHT_CURLY_BRACKET # bounded_time_policy
  | K_DIRECT LEFT_CURLY_BRACKET stream_names RIGHT_CURLY_BRACKET # direct_policy
+ | K_MAX_DELAY time_span LEFT_CURLY_BRACKET stream_names RIGHT_CURLY_BRACKET # max_delay_policy
+ | K_DYNAMIC_TIME time_span LEFT_CURLY_BRACKET stream_names RIGHT_CURLY_BRACKET # dynamic_time_policy
  ;
 
  stream_names

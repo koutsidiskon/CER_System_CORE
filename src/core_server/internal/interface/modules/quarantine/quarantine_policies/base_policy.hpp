@@ -188,9 +188,10 @@ class BasePolicy {
       ZoneScopedN("BasePolicy::start::worker_thread");  //NOLINT
       while (!stop_condition) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        try_add_tuples_to_send_queue();
+        //try_add_tuples_to_send_queue();
         send_events_to_queries();
       }
+      std::cout << "Forcing send of remaining events in quarantine..." << std::endl;
       force_add_tuples_to_send_queue();
       send_events_to_queries();
     });

@@ -1,52 +1,53 @@
-import pandas as pd
-import os
-
-def check_disorder(original_file, test_file):
-    # Read both files
-    df_orig = pd.read_csv(original_file)
+def check_disorder(test_file):
+    import pandas as pd
+    
+    # Read the test file
     df_test = pd.read_csv(test_file)
     
-    # Create a mapping of (stock_time, event_type, name, price) to original index
-    orig_mapping = {
-        tuple(x): i for i, x in enumerate(zip(
-            df_orig['stock_time'],
-            df_orig['event_type'],
-            df_orig['name'],
-            df_orig['price'],
-            df_orig['volume']
-        ))
-    }
+    # Convert Time_A to integer for comparison
+    df_test['Time_A'] = df_test['Time_A'].astype(int)
     
-    # Check for out-of-order events based on time
-    out_of_order_time = 0
+    # Check for out-of-order events
+    out_of_order_events = 0
     prev_time = None
     
-    for i, row in df_test.iterrows():
-        current_time = row['stock_time']
+    for idx, row in df_test.iterrows():
+        current_time = int(row['Time_A'])
         
-        # Check if this event exists in the original file
-        key = (row['stock_time'], row['event_type'], row['name'], row['price'], row['volume'])
-        if key in orig_mapping:
-            orig_pos = orig_mapping[key]
+        if prev_time is not None and current_time < prev_time:
+            out_of_order_events += 1
             
-            # Check if time is out of order
-            if prev_time is not None and current_time < prev_time:
-                out_of_order_time += 1
-                
-        # Update previous time
-        if prev_time is None or current_time != prev_time:
-            prev_time = current_time
+        prev_time = current_time
     
-    total_events = len(df_orig)
-    disorder_percent = (out_of_order_time / total_events) * 100
+    total_events = len(df_test)
+    disorder_percent = (out_of_order_events / total_events) * 100 if total_events > 0 else 0
     
+    print(f"\n--- Disorder Analysis ---")
     print(f"Total events: {total_events}")
-    print(f"Events with earlier timestamps appearing after later ones: {out_of_order_time}")
-    print(f"Time-based disorder percentage: {disorder_percent:.4f}%")
+    print(f"Out of order events: {out_of_order_events}")
+    print(f"Disorder percentage: {disorder_percent:.2f}%")
 
 if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    original_file = os.path.join(base_dir, 'src', 'targets', 'experiments', 'stocks', 'stock_data.csv')
-    test_file = os.path.join(base_dir, 'src', 'targets', 'experiments', 'unordered_stocks', 'test.csv')
+    import os
+    import sys
     
-    check_disorder(original_file, test_file)
+    # Default test file path (relative to the script's location)
+    default_test_file = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        'src', 'targets', 'experiments', 'maritime', '1M_unsorted2.csv'
+    )
+    
+    # Use command line argument if provided, otherwise use default
+    if len(sys.argv) > 1:
+        test_file = sys.argv[1]
+    else:
+        test_file = default_test_file
+        print(f"Using default test file: {test_file}")
+    
+    if os.path.exists(test_file):
+        check_disorder(test_file)
+    else:
+        print(f"Error: File not found: {test_file}")
+        print("Please provide a valid file path as an argument.")
+        print(f"Example: python {os.path.basename(__file__)} path/to/your/file.csv")
+        sys.exit(1)

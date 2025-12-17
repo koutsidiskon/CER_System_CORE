@@ -13,6 +13,7 @@
 #include <tracy/Tracy.hpp>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #include "complex_event.hpp"
 #include "core_server/internal/evaluation/enumeration/tecs/time_reservator.hpp"
@@ -60,6 +61,12 @@ class Enumerator {
   TimeReservator* time_reservator{nullptr};
   TimeReservator::Node* time_reserved_node{nullptr};
   int64_t enumeration_limit;
+
+  std::vector<uint64_t> detection_times;
+  uint64_t get_current_time_us() {  
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+  }
 
  public:
   Enumerator(Node* node,
@@ -150,6 +157,10 @@ class Enumerator {
     }
   };
 
+  const std::vector<uint64_t>& get_detection_times() const {
+    return detection_times;
+  }
+
  private:
   bool has_next() {
     ZoneScopedN("Internal::Enumerator::has_next");
@@ -159,8 +170,8 @@ class Enumerator {
       stack.pop();
       while (true) {
         if (current_node->is_bottom()) {
-          next_value = std::make_pair(std::make_pair(current_node->pos(), original_pos),
-                                      std::move(events));
+          detection_times.push_back(get_current_time_us()); 
+          next_value = std::make_pair(std::make_pair(current_node->pos(), original_pos),std::move(events));
           return true;
         } else if (current_node->is_output()) {
           assert(current_node->get_event_clone().marked_variables.has_value());

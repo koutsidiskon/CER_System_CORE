@@ -16,6 +16,8 @@
 #include <string>
 #include <tracy/Tracy.hpp>
 #include <utility>
+#include <chrono>
+#include <vector>
 
 #include "core_server/internal/coordination/query_catalog.hpp"
 #include "core_server/internal/evaluation/enumeration/tecs/enumerator.hpp"
@@ -67,17 +69,61 @@ class ResultHandler {
 };
 
 class OfflineResultHandler : public ResultHandler {
+ private:
+  std::vector<std::pair<uint64_t, uint64_t>> all_events;
+  size_t total_events = 0;
+  double total_delay = 0.0;
+
  public:
   OfflineResultHandler() : ResultHandler(ResultHandlerType::OFFLINE) {}
+
+  ~OfflineResultHandler() override {
+    // Print summary when handler is destroyed
+    if (!all_events.empty()) {
+      std::cout << "\n=== FINAL SUMMARY ===\n";
+      std::cout << "Total events processed: " << total_events << "\n";
+      std::cout << "Average delay: " << static_cast<uint64_t>(total_delay / total_events) << "ns\n";
+      std::cout << "====================\n";
+    }
+  }
 
   void handle_complex_event(
     std::optional<Internal::tECS::Enumerator>&& internal_enumerator) override {
     ZoneScopedN("OfflineResultHandler::handle_complex_event");
+
     if (!internal_enumerator.has_value()) {
-      return;
+        // End of processing signal, but summary will be printed in destructor
+        return;
     }
-    for (const auto& complex_event : internal_enumerator.value()) {
-      std::cout << complex_event.to_string<true>() << "\n";
+    
+    auto& enumerator = internal_enumerator.value();
+    const auto& detection_times = enumerator.get_detection_times();
+    
+    // Process and print each event immediately to measure accurate delay
+    size_t event_index = 0;
+    for (const auto& event : enumerator) {
+        // Get print time immediately after enumeration of this event
+        auto print_time = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        
+        // Convert to string
+        std::string event_string = event.to_string<true>();
+        
+        // Calculate delay for this specific event
+        auto detection_time = detection_times[event_index];
+        uint64_t delay_ns = (print_time - detection_time);
+        total_delay += delay_ns;
+        all_events.emplace_back(detection_time, print_time);
+        total_events++;
+        
+        // Print individual event details
+        std::cout << "Event " << total_events << ":\n";
+        std::cout << "  Detected at: " << detection_time << "ns\n";
+        std::cout << "  Print time: " << print_time << "ns\n";
+        std::cout << "  Delay: " << delay_ns << "ns\n";
+        std::cout << "  " << event_string << "\n\n";
+        
+        event_index++;
     }
   }
 

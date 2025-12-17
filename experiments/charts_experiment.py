@@ -10,11 +10,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 BUILD = (sys.argv[1].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/unordered_stocks/queries/other-q2_any.txt"
-DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/unordered_stocks/declaration.core"
-CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/stocks/stock_data.csv"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/unordered_stocks/test.csv"
-OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/unordered_stocks/quarantine_declaration.core"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/fires/q1.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/fires/fires.core"
+CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/Fire_wait.csv"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/Fire_wait.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/fires/fire_quarantine.core"
 
 
 DIR = "Debug" if BUILD == "debug" else "Release"
@@ -74,8 +74,13 @@ def run_test(description, cmd, query_contents, options_contents=None):
         result_log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_wait.log"), "w")
 
     for line in result.stdout.splitlines():
-        if line.startswith('[') and options_contents is None:
-            log_file.write(f"{line.split(') )')[0]}" + ") )\n")
+        if options_contents is None:
+            if line.startswith('['):
+                log_file.write(f"{line.split(') )')[0]}" + ") )\n")
+            if line.startswith("Drops: "):
+                match = re.search(r"(\d+)", line)
+                if match:
+                    drops = int(match.group(1))
         elif options_contents is not None:
             if line.startswith("STREAMING"):
                 quarantine_file.write(f"\n{line}\n")
@@ -98,7 +103,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
     
     if options_contents is None:
         num_results = sum(1 for line in result.stdout.splitlines() if line.strip().startswith('['))
-        return num_results, elapsed_time
+        return num_results, elapsed_time, drops
     
     received_order, sent_order, complex_events = extract_events(result.stdout)
 
@@ -121,71 +126,60 @@ if __name__ == "__main__":
 
     print("\nQuery:\n  " + query_contents)
 
-    match = re.search(r'FIXED_TIME\s+(\d+)\s+seconds', options_contents)
+    match = re.search(r'MAX_DELAY\s+(\d+)\s+seconds', options_contents)
     number = None
     quarantine_times = []
     if match:
         number = int(match.group(1))
     
     x = number / 2
-    while x >= 1:
+    while x >= 128:
         quarantine_times.append(int(x))
         x /= 2
 
     x = number
-    for i in range(5):
-        if x > 45:
-            break
+    for i in range(4):
+        '''if x > 45:
+            break'''
         quarantine_times.append(int(x))
         x *= 2
 
     quarantine_times = sorted(quarantine_times)
     print(f"\nQuarantine times to test: {quarantine_times}\n")
 
-    direct_results = []
     execution_time = []
     throughput = []
     numOfResults = []
     numOfDrops = []
     results_labels = ["Execution Time (s)", "Throughput (results/s)", "Number of Results", "Number of Drops"]
 
+    cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
+    num_results_direct, direct_core_time, direct_drops = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
+
     for i in quarantine_times:
-        options_contents = re.sub(r'FIXED_TIME\s+\d+\s+seconds',
-                    f'FIXED_TIME {i} seconds',
+        options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
+                    f'MAX_DELAY {i} seconds',
                     options_contents)
 
         with open(OPTIONS_PATH, "w") as f:
             f.write(options_contents)
 
-        cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
-        
-        directPolicy = []
-        num_results_direct, core_time = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
-        directPolicy.append(round(core_time,2))
-        directPolicy.append(round((num_results_direct / core_time),2))
-        directPolicy.append(num_results_direct)
-        directPolicy.append(0)
-        direct_results.append(directPolicy)
-
         received_wait, sent_wait, events_wait, core_time, drops = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         execution_time.append(round(core_time,2))
         throughput.append(round((num_results_direct / core_time),2))
         numOfResults.append(len(events_wait))
         numOfDrops.append(drops)
     
-    direct_averages = [round(sum(row[i] for row in direct_results) / len(direct_results), 2) 
-            for i in range(len(results_labels))]
-    
     print("== Quarantine Time ==", end="")
     for i in range(len(results_labels)):
         print(f"== {results_labels[i]} ==", end="")
     print()
     print(f"       direct        ", end="")
-    print(f"         {direct_averages[0]}        ", end="")
-    print(f"              {direct_averages[1]}            ", end="")
-    print(f"          {direct_averages[2]}            ", end="")
-    print(f"       {direct_averages[3]}            ", end="")
+    print(f"         {round(direct_core_time,2)}        ", end="")
+    print(f"              {round(num_results_direct / direct_core_time,2)}            ", end="")
+    print(f"          {num_results_direct}            ", end="")
+    print(f"       {direct_drops}            ", end="")
     for i in range(len(quarantine_times)):
         print()
         if quarantine_times[i] < 10:
@@ -204,11 +198,22 @@ if __name__ == "__main__":
 
     # ======= Execution Time =======
     plt.figure(figsize=(8,5))
-    plt.plot(quarantine_times, execution_time, marker='o', color='tab:orange', label='WAIT Policy')
-    plt.axhline(y=direct_averages[0], color='gray', linestyle='--', label=f'DIRECT (avg {direct_averages[0]}s)')
+    # Create a list of x positions for the bars
+    x_pos = range(len(quarantine_times))
+    
+    # Plot the execution times with proper x-positions
+    plt.plot(quarantine_times, execution_time, 'o-', color='tab:orange', label='WAIT Policy')
+    
+    # Add value labels on top of each point with percentage-based offset
+    y_min, y_max = min(execution_time), max(execution_time)
+    y_range = y_max - y_min
+    offset = y_range * 0.05  # 5% of the y-range as offset
     for x, y in zip(quarantine_times, execution_time):
-        plt.text(x, y+0.5, f"{y:.2f}", ha='center', fontsize=9)
-    plt.title('Execution Time vs Quarantine Fixed Time')
+        plt.text(x, y + offset, f"{y:.2f}", ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times with smaller font size
+    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    plt.title(f'Execution Time vs Quarantine Fixed Time\n(DIRECT: {direct_core_time:.2f}s)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
     plt.ylabel('Execution Time (s)')
     plt.legend()
@@ -218,11 +223,16 @@ if __name__ == "__main__":
 
     # ======= Throughput =======
     plt.figure(figsize=(8,5))
-    plt.plot(quarantine_times, throughput, marker='o', color='tab:blue', label='WAIT Policy')
-    plt.axhline(y=direct_averages[1], color='gray', linestyle='--', label=f'DIRECT (avg {direct_averages[1]})')
+    # Plot the throughput with proper x-positions
+    plt.plot(quarantine_times, throughput, 'o-', color='tab:blue', label='WAIT Policy')
+    
+    # Add value labels on top of each point
     for x, y in zip(quarantine_times, throughput):
-        plt.text(x, y+0.5, f"{y:.2f}", ha='center', fontsize=9)
-    plt.title('Query Throughput vs Quarantine Fixed Time')
+        plt.text(x, y+0.1, f"{y:.2f}", ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times with smaller font size
+    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    plt.title(f'Query Throughput vs Quarantine Fixed Time\n(DIRECT: {num_results_direct/direct_core_time:.2f} results/s)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
     plt.ylabel('Throughput (results/sec)')
     plt.legend()
@@ -232,11 +242,16 @@ if __name__ == "__main__":
 
     # ======= Results Found =======
     plt.figure(figsize=(8,5))
-    plt.plot(quarantine_times, numOfResults, marker='o', color='tab:green', label='WAIT Policy')
-    plt.axhline(y=direct_averages[2], color='gray', linestyle='--', label=f'DIRECT (avg {direct_averages[2]})')
+    # Plot the results with proper x-positions
+    plt.plot(quarantine_times, numOfResults, 'o-', color='tab:green', label='WAIT Policy')
+    
+    # Add value labels on top of each point
     for x, y in zip(quarantine_times, numOfResults):
-        plt.text(x, y+0.5, f"{y}", ha='center', fontsize=9)
-    plt.title('Complex Events Found vs Quarantine Fixed Time')
+        plt.text(x, y+0.1, f"{y}", ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times with smaller font size
+    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    plt.title(f'Complex Events Found vs Quarantine Fixed Time\n(DIRECT: {num_results_direct} results)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
     plt.ylabel('Number of Results')
     plt.legend()
@@ -246,11 +261,16 @@ if __name__ == "__main__":
 
     # ======= Drops =======
     plt.figure(figsize=(8,5))
-    plt.plot(quarantine_times, numOfDrops, marker='o', color='tab:red', label='Dropped Events')
-    plt.axhline(y=direct_averages[3], color='gray', linestyle='--', label=f'DIRECT (avg {direct_averages[3]})')
+    # Plot the drops with proper x-positions
+    plt.plot(quarantine_times, numOfDrops, 'o-', color='tab:red', label='Dropped Events')
+    
+    # Add value labels on top of each point
     for x, y in zip(quarantine_times, numOfDrops):
-        plt.text(x, y+0.5, f"{y}", ha='center', fontsize=9)
-    plt.title('Dropped Events vs Quarantine Fixed Time')
+        plt.text(x, y+0.1, f"{y}", ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times with smaller font size
+    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    plt.title(f'Dropped Events vs Quarantine Fixed Time\n(DIRECT: {direct_drops} drops)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
     plt.ylabel('Dropped Events')
     plt.legend()
@@ -258,8 +278,8 @@ if __name__ == "__main__":
     plt.savefig("Drops.png", dpi=300)
     #plt.show()
 
-    options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
-                    f'DYNAMIC_TIME {number} seconds',
+    options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
+                    f'MAX_DELAY {number} seconds',
                     options_contents)
     
     with open(OPTIONS_PATH, "w") as f:

@@ -38,6 +38,7 @@ class DynamicTimePolicy: public BasePolicy {
 
     double safety_margin = 1.5;  
     double avg_lateness_ns = 0.0;
+    double learning_rate = 0.1;
     const double max_quarantine_ns = 1000000.0 * 1e9;
     
     std::deque<double> recent_latencies; 
@@ -124,7 +125,9 @@ class DynamicTimePolicy: public BasePolicy {
     }
     
     if (!recent_latencies.empty()) {
-        avg_lateness_ns = *std::max_element(recent_latencies.begin(), recent_latencies.end());
+        double window_max = *std::max_element(recent_latencies.begin(), recent_latencies.end());
+
+        avg_lateness_ns = (1.0 - learning_rate) * avg_lateness_ns + (learning_rate * window_max);
           
         /*LOG_DEBUG(logger,
                  "Event Latency - Arrival: {:.6f}s, Generation: {:.6f}s, "

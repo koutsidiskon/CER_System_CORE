@@ -38,7 +38,6 @@ class DynamicTimePolicy: public BasePolicy {
 
     double safety_margin = 1.5;  
     double avg_lateness_ns = 0.0;
-    double learning_rate = 0.1;
     const double max_quarantine_ns = 1000000.0 * 1e9;
     
     std::deque<double> recent_latencies; 
@@ -124,17 +123,11 @@ class DynamicTimePolicy: public BasePolicy {
         recent_latencies.pop_front();
     }
     
-    // Jump-and-decay approach with window: if max latency in window exceeds current estimate, jump to it
     if (!recent_latencies.empty()) {
-        double window_max = *std::max_element(recent_latencies.begin(), recent_latencies.end());
-        
-        if (window_max > avg_lateness_ns) {
-            avg_lateness_ns = window_max;
-        } else {
-            avg_lateness_ns = (1.0 - learning_rate) * avg_lateness_ns + learning_rate * window_max;
-        }
+      double sum = std::accumulate(recent_latencies.begin(), recent_latencies.end(), 0.0);
+      avg_lateness_ns = sum / recent_latencies.size();
     } else {
-        avg_lateness_ns = 0;
+      avg_lateness_ns = 0.0;
     }
 
     events.insert(std::move(event));

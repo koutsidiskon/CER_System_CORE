@@ -62,6 +62,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
     drops = 0
     received = 0
     sent = 0
+    avg_detection_delay = 0.0
 
     t0 = time.perf_counter()
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -69,6 +70,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
 
     if options_contents is None:
         log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_direct.log"), "w")
+        quarantine_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_quarantine.log"), "w")
     elif options_contents is not None:
         quarantine_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_quarantine.log"), "w")
         result_log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_wait.log"), "w")
@@ -81,6 +83,13 @@ def run_test(description, cmd, query_contents, options_contents=None):
                 match = re.search(r"(\d+)", line)
                 if match:
                     drops = int(match.group(1))
+            elif line.startswith("Average detection delay: "):
+                match = re.search(r"([\d.]+)", line) 
+                if match:
+                    avg_detection_delay = float(match.group(1))
+                    quarantine_file.write(f"{line}\n")
+            else:
+                quarantine_file.write(f"{line}\n")
         elif options_contents is not None:
             if line.startswith("STREAMING"):
                 quarantine_file.write(f"\n{line}\n")
@@ -99,15 +108,19 @@ def run_test(description, cmd, query_contents, options_contents=None):
                     match = re.search(r"\d+", line)
                     if match:
                         sent = int(match.group())
+                elif line.startswith("Average detection delay: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        avg_detection_delay = float(match.group(1))
                 quarantine_file.write(f"{line}\n")
     
     if options_contents is None:
         num_results = sum(1 for line in result.stdout.splitlines() if line.strip().startswith('['))
-        return num_results, elapsed_time, drops
+        return num_results, elapsed_time, drops, avg_detection_delay
     
     received_order, sent_order, complex_events = extract_events(result.stdout)
 
-    return received_order, sent_order, complex_events, elapsed_time, drops
+    return received_order, sent_order, complex_events, elapsed_time, drops, avg_detection_delay
 
 if __name__ == "__main__":
     if subprocess.call(["docker", "image", "inspect", IMG_LOCAL], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL):
@@ -153,10 +166,12 @@ if __name__ == "__main__":
     throughput = []
     numOfResults = []
     numOfDrops = []
-    results_labels = ["Execution Time (s)", "Throughput (results/s)", "Number of Results", "Number of Drops"]
+    avgDetectionDelays = []
+    
+    results_labels = ["Execution Time (s)", "Throughput (results/s)", "Number of Results", "Number of Drops", "Average Detection Delay (s)"]
 
     cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
-    num_results_direct, direct_core_time, direct_drops = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
+    num_results_direct, direct_core_time, direct_drops, direct_avg_detection_delay = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
 
     for i in quarantine_times:
         options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
@@ -167,11 +182,12 @@ if __name__ == "__main__":
             f.write(options_contents)
 
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
-        received_wait, sent_wait, events_wait, core_time, drops = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait, events_wait, core_time, drops, avg_detection_delay = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         execution_time.append(round(core_time,2))
         throughput.append(round((num_results_direct / core_time),2))
         numOfResults.append(len(events_wait))
         numOfDrops.append(drops)
+        avgDetectionDelays.append(avg_detection_delay)
     
     print("== Quarantine Time ==", end="")
     for i in range(len(results_labels)):
@@ -307,6 +323,30 @@ if __name__ == "__main__":
     plt.tight_layout()  # Adjust layout to prevent label cutoff
     plt.savefig("Dropped Events.png", dpi=300, bbox_inches='tight')
     #plt.show()
+
+    # ======= Average Detection Delay =======
+    plt.figure(figsize=(15,8))
+    # Plot with evenly spaced x-positions
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, avgDetectionDelays, 'o-', color='tab:pink', label='WAIT Policy')
+    # Add value labels on top of each point
+    y_min, y_max = min(avgDetectionDelays), max(avgDetectionDelays)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02  # Reduced from 5% to
+    for x, y in zip(x_pos, avgDetectionDelays):
+        plt.text(x, y + offset, f"{y:.5f}", 
+                ha='center', fontsize=9, va='bottom')
+    # Set x-ticks to show the actual quarantine times
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title(f'Average Detection Delay vs Quarantine Fixed Time\n', pad=10)
+    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.ylabel('Average Detection Delay (s)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()  # Adjust layout to prevent label cutoff
+    plt.savefig("Average Detection Delay.png", dpi=300, bbox_inches='tight')
+    #plt.show() 
+    
 
     options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
                     f'DYNAMIC_TIME {number} seconds',

@@ -100,7 +100,7 @@ class MaxDelayPolicy: public BasePolicy {
     }
     last_received_event_time = event.get_attribute_at_index<Types::IntValue>(1).val;
     events.insert(std::move(event));
-    try_add_tuples_to_send_queue();
+    try_add_tuples_to_send_queue(-1);
   }
 
   bool is_events_empty() override {
@@ -119,7 +119,7 @@ class MaxDelayPolicy: public BasePolicy {
   /**
    * Tries to add received tuples to send queue according to specific policy
    */
-  void try_add_tuples_to_send_queue() override {
+  void try_add_tuples_to_send_queue(size_t type_id) override {
     LOG_TRACE_L3(logger,
                  "Trying to add tuples to send queue in "
                  "MaxDelayPolicy::try_add_tuples_to_send");

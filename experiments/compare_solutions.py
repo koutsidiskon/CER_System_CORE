@@ -13,7 +13,7 @@ def load_solution_data():
     Each solution should have data for different quarantine times.
     """
     
-    # Example: Solution 1 - Dynamic Policy with MAX
+    # Example: Solution 1 - MAX (window max)
     solution1 = {
         'name': 'MAX (window max)',
         'quarantine_times': [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
@@ -21,7 +21,7 @@ def load_solution_data():
         'num_drops': [131,131,131,131,131,131,131,131,131,131,131,112,55,34,24],
     }
     
-    # Example: Solution 2 - Dynamic Policy with a=0.1
+    # Example: Solution 2 - EMA on max (α=0.1)
     solution2 = {
         'name': 'EMA on max (α=0.1)',
         'quarantine_times': [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
@@ -29,7 +29,7 @@ def load_solution_data():
         'num_drops': [133,133,133,133,133,133,133,133,133,133,133,112,56,34,24],
     }
     
-    # Example: Solution 3 - ADAPTIVE Policy
+    # Example: Solution 3 - Jump-and-Decay (α=0.1)
     solution3 = {
         'name': 'Jump-and-Decay (α=0.1)',
         'quarantine_times': [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
@@ -37,7 +37,7 @@ def load_solution_data():
         'num_drops': [130,130,130,130,130,130,130,130,130,130,130,111,55,34,24],
     }
     
-    # Example: Solution 4 - HYBRID Policy
+    # Example: Solution 4 - p99 + EMA (α=0.1)
     solution4 = {
         'name': 'p99 + EMA (α=0.1)',
         'quarantine_times': [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
@@ -45,11 +45,15 @@ def load_solution_data():
         'num_drops': [255,255,255,255,255,255,255,255,255,255,255,141,67,34,24],
     }
     
-    # Example: Solution 5 - DIRECT (baseline)
+    # Example: Solution 5 - Mean (window average)
     solution5 = {
+        'name': 'Mean (window average)',
+        'quarantine_times': [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
+        'num_results': [30624,30624,30624,30624,30624,30624,30624,30624,30624,30640,30808,30851,30862,30867,30870],
+        'num_drops': [1659,1659,1659,1659,1659,1659,1659,1659,1659,1534,472,175,75,34,24],
     }
     
-    return [solution1,solution2,solution3,solution4]
+    return [solution1,solution2,solution3,solution4,solution5]
 
 
 def create_comparison_dataframe(solutions):
@@ -160,6 +164,47 @@ def plot_all_solutions(dfs, solutions):
     print("✓ Saved: comparison_dashboard.png")
 
 
+def plot_top_three(solutions):
+    """Plot results and drops for the first three solutions only"""
+    top3 = solutions[:3]
+    colors = ['tab:blue', 'tab:orange', 'tab:green']
+    markers = ['o', 's', '^']
+    quarantine_times = top3[0]['quarantine_times']
+    x_pos = range(len(quarantine_times))
+
+    # Results
+    plt.figure(figsize=(12, 6))
+    for idx, solution in enumerate(top3):
+        plt.plot(x_pos, solution['num_results'],
+                 marker=markers[idx], linestyle='-', linewidth=2,
+                 color=colors[idx], label=solution['name'], markersize=7)
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title('Results: MAX vs EMA-on-max vs Jump-and-Decay', fontsize=13, fontweight='bold', pad=12)
+    plt.xlabel('Quarantine Time (s)', fontsize=11)
+    plt.ylabel('Number of Results', fontsize=11)
+    plt.legend(fontsize=9, loc='best')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("comparison_results_top3.png", dpi=300, bbox_inches='tight')
+    print("✓ Saved: comparison_results_top3.png")
+
+    # Drops
+    plt.figure(figsize=(12, 6))
+    for idx, solution in enumerate(top3):
+        plt.plot(x_pos, solution['num_drops'],
+                 marker=markers[idx], linestyle='-', linewidth=2,
+                 color=colors[idx], label=solution['name'], markersize=7)
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title('Drops: MAX vs EMA-on-max vs Jump-and-Decay', fontsize=13, fontweight='bold', pad=12)
+    plt.xlabel('Quarantine Time (s)', fontsize=11)
+    plt.ylabel('Number of Dropped Events', fontsize=11)
+    plt.legend(fontsize=9, loc='best')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("comparison_drops_top3.png", dpi=300, bbox_inches='tight')
+    print("✓ Saved: comparison_drops_top3.png")
+
+
 def print_comparison_tables(dfs):
     """Print comparison tables for each metric"""
     
@@ -216,6 +261,7 @@ if __name__ == "__main__":
     # Create all comparison plots
     print("\nGenerating comparison plots...")
     plot_all_solutions(dfs, solutions)
+    plot_top_three(solutions)
     
     print("\n" + "="*100)
     print("DONE! Check the generated PNG files.")

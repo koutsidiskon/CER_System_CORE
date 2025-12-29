@@ -46,3 +46,9 @@ src/targets/experiments/maritime/1M_sorted.csv
 src/targets/experiments/maritime/1M_unsorted.csv
 src/targets/experiments/maritime/1M_unsorted2.csv
 src/targets/experiments/unordered_stocks/test.csv
+src/targets/experiments/fires/CSV/Fire_direct.csv
+src/targets/experiments/fires/CSV/Fire_no_duplicates_direct.csv
+src/targets/experiments/fires/CSV/Fire_no_duplicates_wait.csv
+src/targets/experiments/fires/CSV/Fire_wait.csv
+src/targets/experiments/crypto/FUTURES_top5_symbols_high_delays.csv
+src/targets/experiments/crypto/FUTURES_top5_symbols_low_delays.csv

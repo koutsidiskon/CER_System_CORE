@@ -1,0 +1,7 @@
+CREATE STREAM S {
+EVENT ETH_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
+EVENT BCH_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
+EVENT EOS_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
+EVENT BSV_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
+EVENT BTC_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int}
+}

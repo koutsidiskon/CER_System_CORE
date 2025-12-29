@@ -126,23 +126,25 @@ if __name__ == "__main__":
 
     print("\nQuery:\n  " + query_contents)
 
-    match = re.search(r'MAX_DELAY\s+(\d+)\s+seconds', options_contents)
+    match = re.search(r'DYNAMIC_TIME\s+(\d+)\s+seconds', options_contents)
     number = None
     quarantine_times = []
     if match:
         number = int(match.group(1))
     
-    x = number / 2
-    while x >= 128:
+    x = number
+    while x >= 1:
         quarantine_times.append(int(x))
         x /= 2
+        '''if x > 512:
+            x /= 2
+        else:
+            x /= 8'''
 
-    x = number
+    '''x = number
     for i in range(4):
-        '''if x > 45:
-            break'''
         quarantine_times.append(int(x))
-        x *= 2
+        x *= 2'''
 
     quarantine_times = sorted(quarantine_times)
     print(f"\nQuarantine times to test: {quarantine_times}\n")
@@ -157,8 +159,8 @@ if __name__ == "__main__":
     num_results_direct, direct_core_time, direct_drops = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
 
     for i in quarantine_times:
-        options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
-                    f'MAX_DELAY {i} seconds',
+        options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
+                    f'DYNAMIC_TIME {i} seconds',
                     options_contents)
 
         with open(OPTIONS_PATH, "w") as f:
@@ -197,89 +199,117 @@ if __name__ == "__main__":
     print()
 
     # ======= Execution Time =======
-    plt.figure(figsize=(8,5))
-    # Create a list of x positions for the bars
+    plt.figure(figsize=(15,8))
+    
+    # Use evenly spaced x-positions
     x_pos = range(len(quarantine_times))
     
-    # Plot the execution times with proper x-positions
-    plt.plot(quarantine_times, execution_time, 'o-', color='tab:orange', label='WAIT Policy')
+    # Plot with evenly spaced x-positions
+    plt.plot(x_pos, execution_time, 'o-', color='tab:orange', label='WAIT Policy')
     
-    # Add value labels on top of each point with percentage-based offset
+    # Add value labels on top of each point
     y_min, y_max = min(execution_time), max(execution_time)
-    y_range = y_max - y_min
-    offset = y_range * 0.05  # 5% of the y-range as offset
-    for x, y in zip(quarantine_times, execution_time):
-        plt.text(x, y + offset, f"{y:.2f}", ha='center', fontsize=9, va='bottom')
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02  # Reduced from 5% to 2% of the y-range as offset
     
-    # Set x-ticks to show the actual quarantine times with smaller font size
-    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    for x, y in zip(x_pos, execution_time):
+        plt.text(x, y + offset, f"{y:.2f}", 
+                ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
     plt.title(f'Execution Time vs Quarantine Fixed Time\n(DIRECT: {direct_core_time:.2f}s)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
     plt.ylabel('Execution Time (s)')
     plt.legend()
     plt.grid(True)
-    plt.savefig("Execution Time.png", dpi=300)
+    plt.tight_layout()  # Adjust layout to prevent label cutoff
+    plt.savefig("Execution Time.png", dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Throughput =======
-    plt.figure(figsize=(8,5))
-    # Plot the throughput with proper x-positions
-    plt.plot(quarantine_times, throughput, 'o-', color='tab:blue', label='WAIT Policy')
+    plt.figure(figsize=(15,8))
+    
+    # Plot with evenly spaced x-positions
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, throughput, 'o-', color='tab:blue', label='WAIT Policy')
     
     # Add value labels on top of each point
-    for x, y in zip(quarantine_times, throughput):
-        plt.text(x, y+0.1, f"{y:.2f}", ha='center', fontsize=9, va='bottom')
+    y_min, y_max = min(throughput), max(throughput)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02  # Reduced from 5% to 2% of the y-range as offset
     
-    # Set x-ticks to show the actual quarantine times with smaller font size
-    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    for x, y in zip(x_pos, throughput):
+        plt.text(x, y + offset, f"{y:.2f}", 
+                ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
     plt.title(f'Query Throughput vs Quarantine Fixed Time\n(DIRECT: {num_results_direct/direct_core_time:.2f} results/s)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
     plt.ylabel('Throughput (results/sec)')
     plt.legend()
     plt.grid(True)
-    plt.savefig("Throughput.png", dpi=300)
+    plt.tight_layout()  # Adjust layout to prevent label cutoff
+    plt.savefig("Throughput.png", dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Results Found =======
-    plt.figure(figsize=(8,5))
-    # Plot the results with proper x-positions
-    plt.plot(quarantine_times, numOfResults, 'o-', color='tab:green', label='WAIT Policy')
+    plt.figure(figsize=(15,8))
+    
+    # Plot with evenly spaced x-positions
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, numOfResults, 'o-', color='tab:green', label='WAIT Policy')
     
     # Add value labels on top of each point
-    for x, y in zip(quarantine_times, numOfResults):
-        plt.text(x, y+0.1, f"{y}", ha='center', fontsize=9, va='bottom')
+    y_min, y_max = min(numOfResults), max(numOfResults)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.01  # Reduced from 5% to 1% of the y-range as offset
     
-    # Set x-ticks to show the actual quarantine times with smaller font size
-    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    for x, y in zip(x_pos, numOfResults):
+        plt.text(x, y + offset, f"{y}", 
+                ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
     plt.title(f'Complex Events Found vs Quarantine Fixed Time\n(DIRECT: {num_results_direct} results)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
     plt.ylabel('Number of Results')
     plt.legend()
     plt.grid(True)
-    plt.savefig("Results.png", dpi=300)
+    plt.tight_layout()  # Adjust layout to prevent label cutoff
+    plt.savefig("Results.png", dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Drops =======
-    plt.figure(figsize=(8,5))
-    # Plot the drops with proper x-positions
-    plt.plot(quarantine_times, numOfDrops, 'o-', color='tab:red', label='Dropped Events')
+    plt.figure(figsize=(15,8))
+    
+    # Plot with evenly spaced x-positions
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, numOfDrops, 'o-', color='tab:red', label='Dropped Events')
     
     # Add value labels on top of each point
-    for x, y in zip(quarantine_times, numOfDrops):
-        plt.text(x, y+0.1, f"{y}", ha='center', fontsize=9, va='bottom')
+    y_min, y_max = min(numOfDrops), max(numOfDrops)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.01  # Reduced from 5% to 1% of the y-range as offset
     
-    # Set x-ticks to show the actual quarantine times with smaller font size
-    plt.xticks(quarantine_times, [str(t) for t in quarantine_times], fontsize=8)
+    for x, y in zip(x_pos, numOfDrops):
+        plt.text(x, y + offset, f"{y}", 
+                ha='center', fontsize=9, va='bottom')
+    
+    # Set x-ticks to show the actual quarantine times
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
     plt.title(f'Dropped Events vs Quarantine Fixed Time\n(DIRECT: {direct_drops} drops)', pad=10)
     plt.xlabel('Quarantine Fixed Time (s)')
-    plt.ylabel('Dropped Events')
+    plt.ylabel('Number of Dropped Events')
     plt.legend()
     plt.grid(True)
-    plt.savefig("Drops.png", dpi=300)
+    plt.tight_layout()  # Adjust layout to prevent label cutoff
+    plt.savefig("Dropped Events.png", dpi=300, bbox_inches='tight')
     #plt.show()
 
-    options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
-                    f'MAX_DELAY {number} seconds',
+    options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
+                    f'DYNAMIC_TIME {number} seconds',
                     options_contents)
     
     with open(OPTIONS_PATH, "w") as f:

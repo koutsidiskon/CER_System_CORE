@@ -170,7 +170,18 @@ class Enumerator {
       stack.pop();
       while (true) {
         if (current_node->is_bottom()) {
-          detection_times.push_back(get_current_time_us()); 
+          // Get the received time of the last event (when it arrived at CORE)
+          uint64_t last_event_arrival_time = 0;
+          if (!events.empty()) {
+            // Convert the received_time (system clock) to nanoseconds
+            auto last_event_received = events.back().get_received_time();
+            last_event_arrival_time = std::chrono::duration_cast<std::chrono::nanoseconds>(
+              last_event_received.time_since_epoch()).count();
+          } else {
+            // Fallback to current time if no events
+            last_event_arrival_time = get_current_time_us();
+          }
+          detection_times.push_back(last_event_arrival_time); 
           next_value = std::make_pair(std::make_pair(current_node->pos(), original_pos),std::move(events));
           return true;
         } else if (current_node->is_output()) {

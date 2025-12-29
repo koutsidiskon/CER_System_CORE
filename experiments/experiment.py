@@ -73,30 +73,38 @@ def run_test(description, cmd, query_contents, options_contents=None):
     drops = 0
     received = 0
     sent = 0
+    avg_detection_delay = 0.0
 
     t0 = time.perf_counter()
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
     elapsed_time = time.perf_counter() - t0
 
+    quarantine_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_quarantine.log"), "w")
     if options_contents is None:
         log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_direct.log"), "w")
     elif options_contents is not None:
         print("\nQuarantine fixed time:\n  " + options_contents)
-        quarantine_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_quarantine.log"), "w")
         result_log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_wait.log"), "w")
 
     for line in result.stdout.splitlines():
         if options_contents is None:
-            if line.startswith('['):
+            if line.startswith('  ['):
                 log_file.write(f"{line.split(') )')[0]}" + ") )\n")
-            if line.startswith("Drops: "):
+            elif line.startswith("Drops: "):
                 match = re.search(r"(\d+)", line) 
                 if match:
                     drops = int(match.group(1))
+            elif line.startswith("Average detection delay: "):
+                match = re.search(r"([\d.]+)", line) 
+                if match:
+                    avg_detection_delay = float(match.group(1))
+                    quarantine_file.write(f"{line}\n")
+            else:
+                quarantine_file.write(f"{line}\n")
         elif options_contents is not None:
             if line.startswith("STREAMING"):
                 quarantine_file.write(f"\n{line}\n")
-            elif line.startswith('['):
+            elif line.startswith('  ['):
                 result_log_file.write(f"{line.split(') )')[0]}" + ") )\n")
             else:
                 if line.startswith("Number of events DROPPED"):
@@ -111,11 +119,15 @@ def run_test(description, cmd, query_contents, options_contents=None):
                     match = re.search(r"\d+", line)
                     if match:
                         sent = int(match.group())
+                elif line.startswith("Average detection delay: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        avg_detection_delay = float(match.group(1))
                 quarantine_file.write(f"{line}\n")
     
     if options_contents is None:
         num_results = sum(1 for line in result.stdout.splitlines() if line.strip().startswith('['))
-        return num_results, elapsed_time, drops
+        return num_results, elapsed_time, drops,avg_detection_delay
     
     received_order, sent_order, complex_events = extract_events(result.stdout)
     print("\n🦠 Quarantine Results:")
@@ -131,7 +143,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
     else:
         print(f"❌ NO REORDERING: Events sent in same order as received")
 
-    return received_order, sent_order, complex_events, elapsed_time
+    return received_order, sent_order, complex_events, elapsed_time,avg_detection_delay
 
 if __name__ == "__main__":
     if subprocess.call(["docker", "image", "inspect", IMG_LOCAL], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL):
@@ -150,34 +162,34 @@ if __name__ == "__main__":
 
     if MODE == "direct":
         cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
-        num_results, core_time, drops = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
+        num_results, core_time, drops, avg_detection_delay = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
         print("\n🔍 Results:")
         print(f"Number of input events : {count_events(CSV_PATH)}")
         print(f"Number of unordered events that dropped: {drops}")
         print(f"Number of results      : {num_results}")
         print(f"Query execution time   : {core_time:.2f}s")
-        print(f"Query throughput       : {num_results / core_time:.2f} results/sec")
+        print(f"Average detection delay   : {avg_detection_delay:.9f}s")
     elif MODE == "wait":
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
-        received_wait, sent_wait,complex_events, core_time = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait,complex_events, core_time, avg_detection_delay = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         print("\n🔍 Results:")
         print(f"Number of input events : {count_events(CSV_PATH)}")
         print(f"Number of results      : {len(complex_events)}")
         print(f"Query execution time   : {core_time:.2f}s")
-        print(f"Query throughput       : {len(complex_events) / core_time:.2f} results/sec")
+        print(f"Average detection delay   : {avg_detection_delay:.9f}s")
     elif MODE == "compare":
         cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
         
         print("\nRunning DIRECT policy (no quarantine)…")
-        num_results_direct, core_time, drops_direct = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
+        num_results_direct, core_time, drops_direct , avg_detection_delay = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
         print(f"Query execution time   : {core_time:.2f}s")
-        print(f"Query throughput       : {num_results_direct / core_time:.2f} results/sec")
+        print(f"Average detection delay   : {avg_detection_delay:.9f}s")
         
         print("\nRunning WAIT quarantine policy…")
-        received_wait, sent_wait, complex_events, core_time = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait, complex_events, core_time ,avg_detection_delay= run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         print(f"Query execution time   : {core_time:.2f}s")
-        print(f"Query throughput       : {len(complex_events) / core_time:.2f} results/sec")
+        print(f"Average detection delay   : {avg_detection_delay:.9f}s")
         
         print("\n🔍 Comparison Results:")
         print(f"Number of input events         : {count_events(CSV_PATH)}")

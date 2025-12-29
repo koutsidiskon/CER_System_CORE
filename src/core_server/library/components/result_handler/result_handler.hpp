@@ -8,6 +8,7 @@
 #include <quill/Logger.h>
 
 #include <iostream>
+#include <iomanip>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -70,19 +71,19 @@ class ResultHandler {
 
 class OfflineResultHandler : public ResultHandler {
  private:
-  std::vector<std::pair<uint64_t, uint64_t>> all_events;
   size_t total_events = 0;
-  double total_delay = 0.0;
+  double total_detection_delay = 0.0;
 
  public:
   OfflineResultHandler() : ResultHandler(ResultHandlerType::OFFLINE) {}
 
   ~OfflineResultHandler() override {
     // Print summary when handler is destroyed
-    if (!all_events.empty()) {
+    if (total_events > 0) {
       std::cout << "\n=== FINAL SUMMARY ===\n";
       std::cout << "Total events processed: " << total_events << "\n";
-      std::cout << "Average delay: " << static_cast<uint64_t>(total_delay / total_events) << "ns\n";
+      std::cout << "Average detection delay: " << std::fixed << std::setprecision(9) 
+                << (total_detection_delay / total_events) << "s\n";
       std::cout << "====================\n";
     }
   }
@@ -99,28 +100,69 @@ class OfflineResultHandler : public ResultHandler {
     auto& enumerator = internal_enumerator.value();
     const auto& detection_times = enumerator.get_detection_times();
     
-    // Process and print each event immediately to measure accurate delay
     size_t event_index = 0;
     for (const auto& event : enumerator) {
         // Get print time immediately after enumeration of this event
         auto print_time = std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         
+        // Get the time when the last event arrived at CORE (from received_time of EventWrapper)
+        auto last_event_arrival_time = detection_times[event_index];
+        
         // Convert to string
         std::string event_string = event.to_string<true>();
         
-        // Calculate delay for this specific event
-        auto detection_time = detection_times[event_index];
-        uint64_t delay_ns = (print_time - detection_time);
-        total_delay += delay_ns;
-        all_events.emplace_back(detection_time, print_time);
+      
+        uint64_t last_event_time = 0;
+        uint64_t last_arrive_time = 0;
+        
+    
+        size_t last_attributes_pos = event_string.rfind("attributes: [");
+        
+        if (last_attributes_pos != std::string::npos) {
+        
+            size_t numbers_start = last_attributes_pos + 13; 
+            // Extract the first number (event_time)
+            size_t first_space = event_string.find(' ', numbers_start);
+            if (first_space != std::string::npos) {
+                std::string event_time_str = event_string.substr(numbers_start, first_space - numbers_start);
+                last_event_time = std::stoull(event_time_str);
+                
+                // Extract the second number (arrive_time)
+                size_t second_space = event_string.find(' ', first_space + 1);
+                if (second_space != std::string::npos) {
+                    std::string arrive_time_str = event_string.substr(first_space + 1, second_space - first_space - 1);
+                    last_arrive_time = std::stoull(arrive_time_str);
+                }
+            }
+        }
+        
+        // Calculate delays
+        uint64_t system_arrival_delay = 0;     // arrive_time - event_time (from data, in seconds)
+        uint64_t processing_delay_ns = 0;      // print_time - last_event_arrival_time (measured in real-time, in ns)
+        double detection_delay = 0.0;          // system_arrival_delay + processing_delay (in seconds)
+        
+        if (last_event_time > 0 && last_arrive_time > 0) {
+            // System Arrival Delay: time for event to arrive at CORE (from data, in seconds)
+            system_arrival_delay = last_arrive_time - last_event_time;
+            
+            // Processing Delay: time from when last event arrived at CORE until print (measured in real-time)
+            processing_delay_ns = print_time - last_event_arrival_time;
+            
+            // Convert processing_delay to seconds and add to system_arrival_delay
+            double processing_delay_s = static_cast<double>(processing_delay_ns) / 1000000000.0;
+            detection_delay = system_arrival_delay + processing_delay_s;
+        }
+        
+        total_detection_delay += detection_delay;
         total_events++;
         
         // Print individual event details
         std::cout << "Event " << total_events << ":\n";
-        std::cout << "  Detected at: " << detection_time << "ns\n";
-        std::cout << "  Print time: " << print_time << "ns\n";
-        std::cout << "  Delay: " << delay_ns << "ns\n";
+        std::cout << "  System Arrival Delay (network): " << system_arrival_delay << "s\n";
+        std::cout << "  Processing Delay (CORE processing): " << processing_delay_ns << "ns (" 
+                  << std::fixed << std::setprecision(9) << static_cast<double>(processing_delay_ns) / 1000000000.0 << "s)\n";
+        std::cout << "  Detection Delay (Total): " << std::fixed << std::setprecision(9) << detection_delay << "s\n";
         std::cout << "  " << event_string << "\n\n";
         
         event_index++;

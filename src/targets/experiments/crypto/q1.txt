@@ -1,4 +1,5 @@
 SELECT * FROM S
-WHERE ETH_USD; ETH_USD
-WITHIN 50000 [Event_Timestamp]
-CONSUME BY NONE
+WHERE (BTC as btc; BNB as bnb; DOGE as doge; NEAR as near)
+PARTITION BY [Exchange]
+WITHIN 10 [Event_Timestamp]
+CONSUME BY ANY

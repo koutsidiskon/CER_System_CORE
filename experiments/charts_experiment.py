@@ -10,13 +10,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 BUILD = (sys.argv[1].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/fires/q1.txt"
-DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/fires/fires.core"
-CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/Fire_wait.csv"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/Fire_wait.csv"
-OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/fires/fire_quarantine.core"
-
-
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q1.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/crypto.core"
+CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/crypto/crypto_quarantine.core"
 DIR = "Debug" if BUILD == "debug" else "Release"
 MOUNT_FLAGS = ["-v", f"{PROJECT_ROOT}:/workspace", "-w", "/workspace"]
 ENV_FLAG = ["-e", "TRACY_NO_INVARIANT_CHECK=1"]
@@ -187,7 +185,7 @@ if __name__ == "__main__":
         throughput.append(round((num_results_direct / core_time),2))
         numOfResults.append(len(events_wait))
         numOfDrops.append(drops)
-        avgDetectionDelays.append(avg_detection_delay)
+        avgDetectionDelays.append(round(avg_detection_delay,5))
     
     print("== Quarantine Time ==", end="")
     for i in range(len(results_labels)):
@@ -275,7 +273,7 @@ if __name__ == "__main__":
     
     # Plot with evenly spaced x-positions
     x_pos = range(len(quarantine_times))
-    plt.plot(x_pos, numOfResults, 'o-', color='tab:green', label='WAIT Policy')
+    plt.plot(x_pos, numOfResults, 'o-', color='tab:green', label='DYNAMIC Policy')
     
     # Add value labels on top of each point
     y_min, y_max = min(numOfResults), max(numOfResults)
@@ -328,7 +326,7 @@ if __name__ == "__main__":
     plt.figure(figsize=(15,8))
     # Plot with evenly spaced x-positions
     x_pos = range(len(quarantine_times))
-    plt.plot(x_pos, avgDetectionDelays, 'o-', color='tab:pink', label='WAIT Policy')
+    plt.plot(x_pos, avgDetectionDelays, 'o-', color='tab:pink', label='DYNAMIC Policy')
     # Add value labels on top of each point
     y_min, y_max = min(avgDetectionDelays), max(avgDetectionDelays)
     y_range = y_max - y_min if y_max > y_min else 1

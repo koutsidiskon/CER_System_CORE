@@ -1,7 +1,10 @@
 CREATE STREAM S {
-EVENT ETH_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
-EVENT BCH_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
-EVENT EOS_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
-EVENT BSV_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int},
-EVENT BTC_USD { exchange:string, Event_Timestamp:primary_time, Arrival_Timestamp:int, id:int, side:string, price:double, amount:int}
+EVENT BTC { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string},
+EVENT ETH { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string},
+EVENT BNB { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string},
+EVENT SOL { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string},
+EVENT XRP { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string},
+EVENT ADA { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string},
+EVENT DOGE { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string},
+EVENT NEAR { Event_Timestamp:primary_time, Arrival_Timestamp:int, TxSize:int, TxFee:int, TxIn:int, TxOut:int, ExitBlock:int, BlocksToConfirm:int, SecSinceLB:double, Offset:int, CountOnEntryTime:double, Exchange:string}
 }

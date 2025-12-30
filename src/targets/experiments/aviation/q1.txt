@@ -1,0 +1,5 @@
+SELECT * FROM S
+WHERE (Delta_Air_Lines_Inc as DL; American_Airlines_Inc as AA; JetBlue_Airways as JA)
+FILTER DL[DEST='SEA'] AND AA[DEST='SEA'] AND JA[DEST='SEA']
+WITHIN 5000 [Event_Timestamp]
+CONSUME BY NONE

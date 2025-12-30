@@ -52,3 +52,8 @@ src/targets/experiments/fires/CSV/Fire_no_duplicates_wait.csv
 src/targets/experiments/fires/CSV/Fire_wait.csv
 src/targets/experiments/crypto/FUTURES_top5_symbols_high_delays.csv
 src/targets/experiments/crypto/FUTURES_top5_symbols_low_delays.csv
+experiments/experiment.py
+.gitignore
+src/targets/experiments/aviation/CSV/aviation.csv
+src/targets/experiments/crypto/CSV/crypto.csv
+src/targets/experiments/fires/CSV/fires.csv

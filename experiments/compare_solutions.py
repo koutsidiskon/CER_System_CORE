@@ -52,8 +52,15 @@ def load_solution_data():
         'num_results': [30624,30624,30624,30624,30624,30624,30624,30624,30624,30640,30808,30851,30862,30867,30870],
         'num_drops': [1659,1659,1659,1659,1659,1659,1659,1659,1659,1534,472,175,75,34,24],
     }
+
+    solution6 = {
+        'name': 'Individual quarantine per event type',
+        'quarantine_times': [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
+        'num_results': [30855,30855,30855,30855,30855,30855,30855,30855,30855,30855,30855,30859,30865,30867,30870],
+        'num_drops': [108,108,108,108,108,108,108,108,108,108,108,88,52,33,24],
+    }
     
-    return [solution1,solution2,solution3,solution4,solution5]
+    return [solution1,solution2,solution3,solution4,solution5,solution6]
 
 
 def create_comparison_dataframe(solutions):
@@ -165,21 +172,27 @@ def plot_all_solutions(dfs, solutions):
 
 
 def plot_top_three(solutions):
-    """Plot results and drops for the first three solutions only"""
-    top3 = solutions[:3]
-    colors = ['tab:blue', 'tab:orange', 'tab:green']
-    markers = ['o', 's', '^']
-    quarantine_times = top3[0]['quarantine_times']
+    """Plot results and drops for the key solutions (includes solution 6)."""
+    top_names = [
+        'MAX (window max)',
+        'EMA on max (α=0.1)',
+        'Jump-and-Decay (α=0.1)',
+        'Individual quarantine per event type',
+    ]
+    top_solutions = [s for s in solutions if s['name'] in top_names]
+    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:brown']
+    markers = ['o', 's', '^', 'D']
+    quarantine_times = top_solutions[0]['quarantine_times']
     x_pos = range(len(quarantine_times))
 
     # Results
     plt.figure(figsize=(12, 6))
-    for idx, solution in enumerate(top3):
+    for idx, solution in enumerate(top_solutions):
         plt.plot(x_pos, solution['num_results'],
-                 marker=markers[idx], linestyle='-', linewidth=2,
-                 color=colors[idx], label=solution['name'], markersize=7)
+                 marker=markers[idx % len(markers)], linestyle='-', linewidth=2,
+                 color=colors[idx % len(colors)], label=solution['name'], markersize=7)
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title('Results: MAX vs EMA-on-max vs Jump-and-Decay', fontsize=13, fontweight='bold', pad=12)
+    plt.title('Results: Key Solutions Comparison', fontsize=13, fontweight='bold', pad=12)
     plt.xlabel('Quarantine Time (s)', fontsize=11)
     plt.ylabel('Number of Results', fontsize=11)
     plt.legend(fontsize=9, loc='best')
@@ -190,12 +203,12 @@ def plot_top_three(solutions):
 
     # Drops
     plt.figure(figsize=(12, 6))
-    for idx, solution in enumerate(top3):
+    for idx, solution in enumerate(top_solutions):
         plt.plot(x_pos, solution['num_drops'],
-                 marker=markers[idx], linestyle='-', linewidth=2,
-                 color=colors[idx], label=solution['name'], markersize=7)
+                 marker=markers[idx % len(markers)], linestyle='-', linewidth=2,
+                 color=colors[idx % len(colors)], label=solution['name'], markersize=7)
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title('Drops: MAX vs EMA-on-max vs Jump-and-Decay', fontsize=13, fontweight='bold', pad=12)
+    plt.title('Drops: Key Solutions Comparison', fontsize=13, fontweight='bold', pad=12)
     plt.xlabel('Quarantine Time (s)', fontsize=11)
     plt.ylabel('Number of Dropped Events', fontsize=11)
     plt.legend(fontsize=9, loc='best')

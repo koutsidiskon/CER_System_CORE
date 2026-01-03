@@ -161,34 +161,14 @@ class DynamicTimePolicy: public BasePolicy {
         max_quarantine_ns
     );
 
-    // Log the current dynamic quarantine time
-    /*LOG_INFO(logger,
-                "Dynamic Quarantine: {:.6f}s (avg lateness: {:.6f}s * {:.1f} safety margin)",
-                dynamic_quarantine_ns * 1e-9,
-                avg_lateness_ns * 1e-9,
-                safety_margin);*/
-
     for (auto iter = events.begin(); iter != events.end();) {
       const auto& event = *iter;
       auto event_arrival_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
       
       double current_lateness_ns = (last_received_event_time.value() - event_arrival_time) * 1e9;  
       
-      /*LOG_INFO(logger,
-                  "Event Check - Arrival: {:.6f}s, Last Received: {:.6f}s, "
-                  "Current Lateness: {:.6f}s",
-                  event_arrival_time * 1e-9,
-                  last_received_event_time.value() * 1e-9,
-                  current_lateness_ns * 1e-9);*/
-      
       if ((current_lateness_ns > dynamic_quarantine_ns) || end_of_stream_received) {
         sent_events++;
-        /*LOG_INFO(logger,
-                    "Adding event with id {}: lateness={:.6f}s, quarantine={:.6f}s, duration={:.6f}s",
-                    event.get_unique_event_type_id(),
-                    current_lateness_ns * 1e-9,
-                    dynamic_quarantine_ns * 1e-9,
-                    (dynamic_quarantine_ns - current_lateness_ns) * 1e-9)*/
         
         assert(event.get_primary_time().val >= last_time_sent.val
                 && "Event time is not after last time sent");
@@ -197,7 +177,6 @@ class DynamicTimePolicy: public BasePolicy {
         last_time_sent = internal_node.value().get_primary_time();
         this->send_event_queue.enqueue(std::move(internal_node.value()));
       } else {
-          // Events are in order, so if this one isn't ready, the rest won't be either
           break;
       }
     }
@@ -205,13 +184,6 @@ class DynamicTimePolicy: public BasePolicy {
 
 
   void force_add_tuples_to_send_queue() override {
-    //std::lock_guard<std::mutex> lock(events_lock);
-    /*for (auto iter = events.begin(); iter != events.end();) {
-      
-      sent_events++;
-      auto internal_node = events.extract(iter++);
-      this->send_event_queue.enqueue(std::move(internal_node.value()));
-    }*/
     std::cout << "Number of events RECEIVED by quarantine: " << received_events << std::endl;
     std::cout << "Number of events SENT by quarantine: " << sent_events << std::endl;
     std::cout << "Number of events DROPPED by quarantine: " << drops << std::endl;

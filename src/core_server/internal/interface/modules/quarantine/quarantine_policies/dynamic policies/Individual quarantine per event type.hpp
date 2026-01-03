@@ -141,7 +141,7 @@ class DynamicTimePolicy: public BasePolicy {
     }
 
     events.insert(std::move(event));
-    try_add_tuples_to_send_queue(type_id);
+    try_add_tuples_to_send_queue();
   }
 
   bool is_events_empty() override {
@@ -160,7 +160,7 @@ class DynamicTimePolicy: public BasePolicy {
   /**
    * Tries to add received tuples to send queue according to specific policy
    */
-  void try_add_tuples_to_send_queue(size_t type_id) override {
+  void try_add_tuples_to_send_queue() override {
     if (!last_received_event_time || events.empty()) {
         return;
     }
@@ -187,7 +187,6 @@ class DynamicTimePolicy: public BasePolicy {
         last_time_sent = internal_node.value().get_primary_time();
         this->send_event_queue.enqueue(std::move(internal_node.value()));
       } else {
-          // Events are in order, so if this one isn't ready, the rest won't be either
           break;
       }
     }
@@ -195,13 +194,6 @@ class DynamicTimePolicy: public BasePolicy {
 
 
   void force_add_tuples_to_send_queue() override {
-    //std::lock_guard<std::mutex> lock(events_lock);
-    /*for (auto iter = events.begin(); iter != events.end();) {
-      
-      sent_events++;
-      auto internal_node = events.extract(iter++);
-      this->send_event_queue.enqueue(std::move(internal_node.value()));
-    }*/
     std::cout << "Number of events RECEIVED by quarantine: " << received_events << std::endl;
     std::cout << "Number of events SENT by quarantine: " << sent_events << std::endl;
     std::cout << "Number of events DROPPED by quarantine: " << drops << std::endl;

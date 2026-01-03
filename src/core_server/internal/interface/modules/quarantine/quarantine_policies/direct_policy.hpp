@@ -40,7 +40,7 @@ class DirectPolicy : public BasePolicy {
   }
 
  protected:
-  void try_add_tuples_to_send_queue(size_t type_id) override {
+  void try_add_tuples_to_send_queue() override {
     // No need to try to add tuples to send queue as they are directly sent
   }
 

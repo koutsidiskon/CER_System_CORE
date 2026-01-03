@@ -112,7 +112,6 @@ class DynamicTimePolicy: public BasePolicy {
         if (idx >= sorted_latencies.size()) idx = sorted_latencies.size() - 1;
         double p_value = sorted_latencies[idx];
         
-        // Apply EMA smoothing
         avg_lateness_ns = (1.0 - rate) * avg_lateness_ns + (rate * p_value);
     } else {
         avg_lateness_ns = 0;

@@ -135,7 +135,7 @@ class BasePolicy {
   virtual bool is_events_empty() = 0;
 
  protected:
-  virtual void try_add_tuples_to_send_queue(size_t type_id = 0) = 0;
+  virtual void try_add_tuples_to_send_queue() = 0;
 
   virtual void force_add_tuples_to_send_queue() = 0;
 

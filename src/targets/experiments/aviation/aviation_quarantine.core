@@ -1,3 +1,3 @@
 CREATE QUARANTINE {
-  DYNAMIC_TIME 16384 seconds {S}
+  MAX_DELAY 16384 seconds {S}
   }

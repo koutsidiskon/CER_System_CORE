@@ -1,4 +1,5 @@
 SELECT * FROM S
 WHERE (Alaska_Airlines_Inc as alaska; JetBlue_Airways as jetblue)
+PARTITION BY [ORIGIN]
 WITHIN 50 [Event_Timestamp]
 CONSUME BY NONE

@@ -9,7 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "direct"
 BUILD = (sys.argv[2].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q1.txt"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q3.txt"
 DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/crypto.core"
 CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
 OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/crypto/crypto_quarantine.core"

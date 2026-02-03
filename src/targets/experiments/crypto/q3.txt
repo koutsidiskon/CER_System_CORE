@@ -1,4 +1,6 @@
 SELECT * FROM S
 WHERE (BNB as bnb; DOGE as doge; NEAR as near)
+FILTER bnb[TxFee<10000] AND doge[TxSize<250] AND near[TxFee>500]
+PARTITION BY [Exchange]
 WITHIN 10 [Event_Timestamp]
 CONSUME BY ANY

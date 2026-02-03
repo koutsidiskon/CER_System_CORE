@@ -41,7 +41,7 @@ class DynamicTimePolicy: public BasePolicy {
     double avg_lateness_ns = 0.0;
     const double max_quarantine_ns = 1000000.0 * 1e9;
     
-    double rate = 0.05;
+    double rate = 0.1;
     size_t window_size = 500;
     std::deque<double> recent_latencies;
     double percentile = 0.99; 

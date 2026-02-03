@@ -10,7 +10,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 BUILD = (sys.argv[1].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q1.txt"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q3.txt"
 DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/crypto.core"
 CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
 CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     print("\nQuery:\n  " + query_contents)
 
-    match = re.search(r'DYNAMIC_TIME\s+(\d+)\s+seconds', options_contents)
+    match = re.search(r'MAX_DELAY\s+(\d+)\s+seconds', options_contents)
     number = None
     quarantine_times = []
     if match:
@@ -172,8 +172,8 @@ if __name__ == "__main__":
     num_results_direct, direct_core_time, direct_drops, direct_avg_detection_delay = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
 
     for i in quarantine_times:
-        options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
-                    f'DYNAMIC_TIME {i} seconds',
+        options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
+                    f'MAX_DELAY {i} seconds',
                     options_contents)
 
         with open(OPTIONS_PATH, "w") as f:
@@ -346,11 +346,23 @@ if __name__ == "__main__":
     #plt.show() 
     
 
-    options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
-                    f'DYNAMIC_TIME {number} seconds',
+    options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
+                    f'MAX_DELAY {number} seconds',
                     options_contents)
     
     with open(OPTIONS_PATH, "w") as f:
             f.write(options_contents)
+    
+    # Print all results as tuples
+    print("\n" + "="*70)
+    print("📊 RESULTS AS TUPLES")
+    print("="*70)
+    print(f"\nQuarantine Times: {tuple(quarantine_times)}")
+    print(f"Execution Time (s): {tuple(execution_time)}")
+    print(f"Throughput (results/s): {tuple(throughput)}")
+    print(f"Number of Results: {tuple(numOfResults)}")
+    print(f"Number of Drops: {tuple(numOfDrops)}")
+    print(f"Average Detection Delays (s): {tuple(avgDetectionDelays)}")
+    print("="*70)
         
         

@@ -1,4 +1,6 @@
 SELECT * FROM S
 WHERE (Alaska_Airlines_Inc as alaska; JetBlue_Airways as jetblue)
+FILTER alaska[AIR_TIME>120.0] AND jetblue[DISTANCE>1000]
+PARTITION BY [ORIGIN]
 WITHIN 50 [Event_Timestamp]
 CONSUME BY NONE

@@ -109,6 +109,9 @@ class DynamicTimePolicy: public BasePolicy {
     
     if (event_gen_time < last_time_sent.val) {
       drops++;
+
+      std::cout << event.get_event_reference().to_string() << std::endl;
+      
       LOG_WARNING(logger,
                  "Dropping out-of-order event. Current: {}, New: {}",
                  last_time_sent.val,

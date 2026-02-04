@@ -12,7 +12,7 @@
 class  OptionDeclarationParser : public antlr4::Parser {
 public:
   enum {
-    WS = 1, K_CREATE = 2, K_QUARANTINE = 3, K_FIXED_TIME = 4, K_MAX_DELAY = 5, 
+    WS = 1, K_CREATE = 2, K_QUARANTINE = 3, K_FIXED_TIME = 4, K_NEW_FIXED_TIME = 5, 
     K_BOUNDED_TIME = 6, K_DYNAMIC_TIME = 7, K_DIRECT = 8, K_HOURS = 9, K_MINUTES = 10, 
     K_SECONDS = 11, LEFT_CURLY_BRACKET = 12, RIGHT_CURLY_BRACKET = 13, COMMA = 14, 
     DOUBLE_LITERAL = 15, INTEGER_LITERAL = 16, NUMERICAL_EXPONENT = 17, 
@@ -120,19 +120,6 @@ public:
    
   };
 
-  class  Max_delay_policyContext : public Quarantine_policyContext {
-  public:
-    Max_delay_policyContext(Quarantine_policyContext *ctx);
-
-    antlr4::tree::TerminalNode *K_MAX_DELAY();
-    Time_spanContext *time_span();
-    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
-    Stream_namesContext *stream_names();
-    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   class  Bounded_time_policyContext : public Quarantine_policyContext {
   public:
     Bounded_time_policyContext(Quarantine_policyContext *ctx);
@@ -151,6 +138,19 @@ public:
     Direct_policyContext(Quarantine_policyContext *ctx);
 
     antlr4::tree::TerminalNode *K_DIRECT();
+    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
+    Stream_namesContext *stream_names();
+    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  New_fixed_time_policyContext : public Quarantine_policyContext {
+  public:
+    New_fixed_time_policyContext(Quarantine_policyContext *ctx);
+
+    antlr4::tree::TerminalNode *K_NEW_FIXED_TIME();
+    Time_spanContext *time_span();
     antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
     Stream_namesContext *stream_names();
     antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();

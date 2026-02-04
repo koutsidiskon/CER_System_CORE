@@ -124,8 +124,8 @@ def write_options_file(contents):
         f.write(contents)
 
 def get_dynamic_times_from_options(options_contents):
-    """Extract and calculate MAX_DELAY values to test from the options file."""
-    match = re.search(r'MAX_DELAY\s+(\d+)\s+seconds', options_contents)
+    """Extract and calculate NEW_FIXED_TIME values to test from the options file."""
+    match = re.search(r'NEW_FIXED_TIME\s+(\d+)\s+seconds', options_contents)
     if not match:
         return []
     
@@ -140,9 +140,9 @@ def get_dynamic_times_from_options(options_contents):
     return sorted(dynamic_times)
 
 def update_dynamic_time(options_contents, dynamic_time):
-    """Update the MAX_DELAY value in the options contents."""
-    return re.sub(r'MAX_DELAY\s+\d+\s+seconds',
-                  f'MAX_DELAY {dynamic_time} seconds',
+    """Update the NEW_FIXED_TIME value in the options contents."""
+    return re.sub(r'NEW_FIXED_TIME\s+\d+\s+seconds',
+                  f'NEW_FIXED_TIME {dynamic_time} seconds',
                   options_contents)
 
 def run_experiment(run_num, total_runs, dynamic_time=None):
@@ -325,7 +325,7 @@ def main():
         dynamic_times = get_dynamic_times_from_options(original_options)
         
         if not dynamic_times:
-            print("❌ No MAX_DELAY found in options file!")
+            print("❌ No NEW_FIXED_TIME found in options file!")
             sys.exit(1)
         
         print(f"\n📋 Dynamic times to test: {dynamic_times}")
@@ -338,7 +338,7 @@ def main():
         # Run experiments for each dynamic time
         for dynamic_time in dynamic_times:
             print(f"\n{'='*70}")
-            print(f"⏱️  Testing MAX_DELAY = {dynamic_time} seconds")
+            print(f"⏱️  Testing NEW_FIXED_TIME = {dynamic_time} seconds")
             print(f"{'='*70}")
             
             # Update options file with new dynamic time

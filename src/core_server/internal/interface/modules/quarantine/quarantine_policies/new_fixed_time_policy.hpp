@@ -22,7 +22,7 @@
 
 namespace CORE::Internal::Interface::Module::Quarantine {
 
-class MaxDelayPolicy: public BasePolicy {
+class NewFixedTimePolicy: public BasePolicy {
   std::mutex events_lock;
   std::set<Types::EventWrapper> events;
   std::chrono::duration<int64_t, std::nano> time_to_wait;
@@ -38,14 +38,14 @@ class MaxDelayPolicy: public BasePolicy {
   Types::IntValue last_time_sent = Types::IntValue::create_lower_bound();
 
  public:
-  MaxDelayPolicy(Catalog& catalog,
+  NewFixedTimePolicy(Catalog& catalog,
                       std::atomic<Types::PortNumber>& next_available_inproc_port,
                       std::chrono::duration<int64_t, std::nano> time_to_wait)
       : BasePolicy(catalog, next_available_inproc_port), time_to_wait(time_to_wait) {
     this->start();
   }
 
-  ~MaxDelayPolicy() { this->handle_destruction(); }
+  ~NewFixedTimePolicy() { this->handle_destruction(); }
 
   void save_events_to_disk() {
     if (events.empty()) {
@@ -77,10 +77,10 @@ class MaxDelayPolicy: public BasePolicy {
 
   void receive_event(Types::EventWrapper&& event) override {
     received_events++;
-    ZoneScopedN("MaxDelayPolicy::receive_event");
+    ZoneScopedN("NewFixedTimePolicy::receive_event");
     LOG_TRACE_L1(logger,
                  "Received event with id {} and time {} in "
-                 "MaxDelayPolicy::receive_event",
+                 "NewFixedTimePolicy::receive_event",
                  event.get_unique_event_type_id(),
                  event.get_primary_time().val);
 
@@ -92,7 +92,7 @@ class MaxDelayPolicy: public BasePolicy {
       drops++;
       LOG_WARNING(logger,
                   "Dropping event with id {} and time {} in "
-                  "MaxDelayPolicy::receive_event due to time being before last time "
+                  "NewFixedTimePolicy::receive_event due to time being before last time "
                   "sent",
                   event.get_unique_event_type_id(),
                   event.get_primary_time().val);
@@ -122,7 +122,7 @@ class MaxDelayPolicy: public BasePolicy {
   void try_add_tuples_to_send_queue() override {
     LOG_TRACE_L3(logger,
                  "Trying to add tuples to send queue in "
-                 "MaxDelayPolicy::try_add_tuples_to_send");
+                 "NewFixedTimePolicy::try_add_tuples_to_send");
 
     //std::lock_guard<std::mutex> lock(events_lock);
     
@@ -135,7 +135,7 @@ class MaxDelayPolicy: public BasePolicy {
         sent_events++;
         LOG_TRACE_L1(logger,
                      "Adding event with id {} and time {} to send queue in "
-                     "MaxDelayPolicy::try_add_tuples_to_send",
+                     "NewFixedTimePolicy::try_add_tuples_to_send",
                      event.get_unique_event_type_id(),
                      event.get_primary_time().val);
         assert(event.get_primary_time().val >= last_time_sent.val

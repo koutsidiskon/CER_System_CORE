@@ -28,7 +28,7 @@ COLORS = {
     "Individual per event": "#9467bd",  
     "Sorted": "#8c564b",  
     "BoundedWaitTimePolicy": "#e377c2", 
-    "MaxDelayPolicy": "#7f7f7f",  
+    "NewFixedTimePolicy": "#7f7f7f",  
     "WaitFixedTimePolicy": "#bcbd22",  
 }
 

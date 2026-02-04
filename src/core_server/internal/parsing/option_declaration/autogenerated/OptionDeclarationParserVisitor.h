@@ -31,7 +31,7 @@ public:
 
     virtual std::any visitDirect_policy(OptionDeclarationParser::Direct_policyContext *context) = 0;
 
-    virtual std::any visitMax_delay_policy(OptionDeclarationParser::Max_delay_policyContext *context) = 0;
+    virtual std::any visitNew_fixed_time_policy(OptionDeclarationParser::New_fixed_time_policyContext *context) = 0;
 
     virtual std::any visitDynamic_time_policy(OptionDeclarationParser::Dynamic_time_policyContext *context) = 0;
 

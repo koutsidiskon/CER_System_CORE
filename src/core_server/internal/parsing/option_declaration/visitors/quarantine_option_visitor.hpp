@@ -34,9 +34,9 @@ class QuarantineOptionVisitor : public OptionDeclarationParserBaseVisitor {
     return {};
   }
 
-  std::any visitMax_delay_policy(OptionDeclarationParser::Max_delay_policyContext* ctx) override {
+  std::any visitNew_fixed_time_policy(OptionDeclarationParser::New_fixed_time_policyContext* ctx) override {
     policy_type = Interface::Module::Quarantine::QuarantinePolicy::QuarantinePolicyType::
-      MaxDelayPolicy;
+      NewFixedTimePolicy;
     visitChildren(ctx);
     return {};
   }

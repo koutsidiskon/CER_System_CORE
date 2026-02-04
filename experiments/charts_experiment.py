@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     print("\nQuery:\n  " + query_contents)
 
-    match = re.search(r'MAX_DELAY\s+(\d+)\s+seconds', options_contents)
+    match = re.search(r'NEW_FIXED_TIME\s+(\d+)\s+seconds', options_contents)
     number = None
     quarantine_times = []
     if match:
@@ -172,8 +172,8 @@ if __name__ == "__main__":
     num_results_direct, direct_core_time, direct_drops, direct_avg_detection_delay = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
 
     for i in quarantine_times:
-        options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
-                    f'MAX_DELAY {i} seconds',
+        options_contents = re.sub(r'NEW_FIXED_TIME\s+\d+\s+seconds',
+                    f'NEW_FIXED_TIME {i} seconds',
                     options_contents)
 
         with open(OPTIONS_PATH, "w") as f:
@@ -346,8 +346,8 @@ if __name__ == "__main__":
     #plt.show() 
     
 
-    options_contents = re.sub(r'MAX_DELAY\s+\d+\s+seconds',
-                    f'MAX_DELAY {number} seconds',
+    options_contents = re.sub(r'NEW_FIXED_TIME\s+\d+\s+seconds',
+                    f'NEW_FIXED_TIME {number} seconds',
                     options_contents)
     
     with open(OPTIONS_PATH, "w") as f:

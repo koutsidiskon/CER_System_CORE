@@ -51,7 +51,7 @@ void optiondeclarationparserParserInitialize() {
       "", "", "", "", "", "", "", "", "", "", "", "", "'{'", "'}'", "','"
     },
     std::vector<std::string>{
-      "", "WS", "K_CREATE", "K_QUARANTINE", "K_FIXED_TIME", "K_MAX_DELAY", 
+      "", "WS", "K_CREATE", "K_QUARANTINE", "K_FIXED_TIME", "K_NEW_FIXED_TIME", 
       "K_BOUNDED_TIME", "K_DYNAMIC_TIME", "K_DIRECT", "K_HOURS", "K_MINUTES", 
       "K_SECONDS", "LEFT_CURLY_BRACKET", "RIGHT_CURLY_BRACKET", "COMMA", 
       "DOUBLE_LITERAL", "INTEGER_LITERAL", "NUMERICAL_EXPONENT", "IDENTIFIER", 
@@ -389,37 +389,6 @@ void OptionDeclarationParser::Quarantine_policyContext::copyFrom(Quarantine_poli
   ParserRuleContext::copyFrom(ctx);
 }
 
-//----------------- Max_delay_policyContext ------------------------------------------------------------------
-
-tree::TerminalNode* OptionDeclarationParser::Max_delay_policyContext::K_MAX_DELAY() {
-  return getToken(OptionDeclarationParser::K_MAX_DELAY, 0);
-}
-
-OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Max_delay_policyContext::time_span() {
-  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
-}
-
-tree::TerminalNode* OptionDeclarationParser::Max_delay_policyContext::LEFT_CURLY_BRACKET() {
-  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
-}
-
-OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Max_delay_policyContext::stream_names() {
-  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
-}
-
-tree::TerminalNode* OptionDeclarationParser::Max_delay_policyContext::RIGHT_CURLY_BRACKET() {
-  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
-}
-
-OptionDeclarationParser::Max_delay_policyContext::Max_delay_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
-
-
-std::any OptionDeclarationParser::Max_delay_policyContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
-    return parserVisitor->visitMax_delay_policy(this);
-  else
-    return visitor->visitChildren(this);
-}
 //----------------- Bounded_time_policyContext ------------------------------------------------------------------
 
 tree::TerminalNode* OptionDeclarationParser::Bounded_time_policyContext::K_BOUNDED_TIME() {
@@ -475,6 +444,37 @@ OptionDeclarationParser::Direct_policyContext::Direct_policyContext(Quarantine_p
 std::any OptionDeclarationParser::Direct_policyContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
     return parserVisitor->visitDirect_policy(this);
+  else
+    return visitor->visitChildren(this);
+}
+//----------------- New_fixed_time_policyContext ------------------------------------------------------------------
+
+tree::TerminalNode* OptionDeclarationParser::New_fixed_time_policyContext::K_NEW_FIXED_TIME() {
+  return getToken(OptionDeclarationParser::K_NEW_FIXED_TIME, 0);
+}
+
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::New_fixed_time_policyContext::time_span() {
+  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::New_fixed_time_policyContext::LEFT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::New_fixed_time_policyContext::stream_names() {
+  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::New_fixed_time_policyContext::RIGHT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::New_fixed_time_policyContext::New_fixed_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+
+
+std::any OptionDeclarationParser::New_fixed_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
+    return parserVisitor->visitNew_fixed_time_policy(this);
   else
     return visitor->visitChildren(this);
 }
@@ -601,11 +601,11 @@ OptionDeclarationParser::Quarantine_policyContext* OptionDeclarationParser::quar
         break;
       }
 
-      case OptionDeclarationParser::K_MAX_DELAY: {
-        _localctx = _tracker.createInstance<OptionDeclarationParser::Max_delay_policyContext>(_localctx);
+      case OptionDeclarationParser::K_NEW_FIXED_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::New_fixed_time_policyContext>(_localctx);
         enterOuterAlt(_localctx, 4);
         setState(68);
-        match(OptionDeclarationParser::K_MAX_DELAY);
+        match(OptionDeclarationParser::K_NEW_FIXED_TIME);
         setState(69);
         time_span();
         setState(70);

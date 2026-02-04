@@ -9,10 +9,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "direct"
 BUILD = (sys.argv[2].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/fires/q3.txt"
-DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/fires/fires.core"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/fires_sorted.csv"
-OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/fires/fires_quarantine.core"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q4.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/crypto.core"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/crypto/crypto_quarantine.core"
 
 # Support flag-style --options or -o anywhere on the command line. This
 # preserves the existing positional behavior (6th arg) but allows callers
@@ -87,6 +87,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
         result_log_file = open(os.path.join(PROJECT_ROOT, "logs/logfile_experiment_wait.log"), "w")
 
     for line in result.stdout.splitlines():
+        log_file.write(f"{line}\n") if options_contents is None else None
         if options_contents is None:
             if line.startswith('  ['):
                 log_file.write(f"{line.split(') )')[0]}" + ") )\n")

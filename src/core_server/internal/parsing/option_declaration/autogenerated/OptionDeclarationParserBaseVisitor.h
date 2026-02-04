@@ -39,7 +39,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitMax_delay_policy(OptionDeclarationParser::Max_delay_policyContext *ctx) override {
+  virtual std::any visitNew_fixed_time_policy(OptionDeclarationParser::New_fixed_time_policyContext *ctx) override {
     return visitChildren(ctx);
   }
 

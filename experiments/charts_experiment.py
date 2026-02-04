@@ -10,11 +10,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 BUILD = (sys.argv[1].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q3.txt"
-DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/crypto.core"
-CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
-CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
-OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/crypto/crypto_quarantine.core"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/fires/q2.txt"
+DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/fires/fires.core"
+CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/fires.csv"
+CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/fires/CSV/fires.csv"
+OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/fires/fires_quarantine.core"
 DIR = "Debug" if BUILD == "debug" else "Release"
 MOUNT_FLAGS = ["-v", f"{PROJECT_ROOT}:/workspace", "-w", "/workspace"]
 ENV_FLAG = ["-e", "TRACY_NO_INVARIANT_CHECK=1"]

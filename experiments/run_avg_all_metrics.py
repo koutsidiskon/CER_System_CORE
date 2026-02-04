@@ -30,10 +30,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 MODE = sys.argv[1] if len(sys.argv) > 1 else "compare"
 NUM_RUNS = int(sys.argv[2]) if len(sys.argv) > 2 else 10
 BUILD = sys.argv[3] if len(sys.argv) > 3 else "release"
-QUERY = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/q3.txt"
-DECL = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/crypto.core"
-CSV = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/crypto/CSV/crypto.csv"
-OPTIONS = sys.argv[7] if len(sys.argv) > 7 else "src/targets/experiments/crypto/crypto_quarantine.core"
+QUERY = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/aviation/q3.txt"
+DECL = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/aviation/aviation.core"
+CSV = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/aviation/CSV/aviation_sorted.csv"
+OPTIONS = sys.argv[7] if len(sys.argv) > 7 else "src/targets/experiments/aviation/aviation_quarantine.core"
 
 OPTIONS_PATH = os.path.join(PROJECT_ROOT, OPTIONS)
 

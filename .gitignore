@@ -57,3 +57,6 @@ experiments/experiment.py
 src/targets/experiments/aviation/CSV/aviation.csv
 src/targets/experiments/crypto/CSV/crypto.csv
 src/targets/experiments/fires/CSV/fires.csv
+src/targets/experiments/fires/CSV/fires_sorted.csv
+src/targets/experiments/crypto/CSV/crypto_sorted.csv
+src/targets/experiments/aviation/CSV/aviation_sorted.csv

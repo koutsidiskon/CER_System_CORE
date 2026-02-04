@@ -17,7 +17,20 @@ QUARANTINE_TIMES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 819
 # Data for multiple datasets
 # Each dataset has metrics for three implementations: Direct, Fixed-Time, Individual per event
 # Metrics: num_results, num_drops, exec_time, detection_delay
-IMPLEMENTATIONS = ["Direct", "Fixed-Time", "jump_and_decay", "max", "Individual per event"]
+IMPLEMENTATIONS = ["Direct", "Fixed-Time", "jump_and_decay", "max", "Individual per event", "Sorted"]
+
+# Color scheme for consistent coloring across all plots
+COLORS = {
+    "Direct": "#1f77b4",  
+    "Fixed-Time": "#ff7f0e",  
+    "jump_and_decay": "#2ca02c",  
+    "max": "#d62728",  
+    "Individual per event": "#9467bd",  
+    "Sorted": "#8c564b", 
+    "BoundedWaitTimePolicy": "#e377c2",  
+    "MaxDelayPolicy": "#7f7f7f", 
+    "WaitFixedTimePolicy": "#bcbd22", 
+}
 
 DATASETS = {
     "Fires": {
@@ -51,6 +64,12 @@ DATASETS = {
             "exec_time":   [4.35, 4.41, 4.41, 4.41, 4.47, 4.49, 5.10, 4.44, 4.48, 4.85, 4.51, 4.49, 4.79, 4.52, 4.52],
             "detection_delay": [276.15557, 276.15557, 276.15557, 276.15557, 276.15557, 276.15557, 276.15557, 276.15557, 276.15557, 276.15557, 276.15557, 276.36670, 277.11388, 277.12897, 277.12925],
         },
+        "Sorted": {
+            "num_results": [30874,30874,30874,30874,30874,30874,30874,30874,30874,30874,30874,30874,30874,30874,30874],
+            "num_drops": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "exec_time": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "detection_delay": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        },
     },
     "Aviation": {
         "Direct": {
@@ -83,6 +102,12 @@ DATASETS = {
             "exec_time":   [12.40, 12.40, 12.57, 12.54, 11.85, 12.54, 11.90, 12.11, 11.96, 11.63, 11.54, 11.49, 11.60, 11.88, 11.52],
             "detection_delay": [1255.74340, 1255.74593, 1255.68418, 1255.74233, 1255.74628, 1255.74593, 1255.74593, 1255.74593, 1255.74593, 1255.84983, 1255.84983, 1255.84983, 1255.79178, 1255.84983, 1255.84225],
         },
+        "Sorted": {
+            "num_results": [49704,49704,49704,49704,49704,49704,49704,49704,49704,49704,49704,49704,49704,49704,49704],
+            "num_drops": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "exec_time": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "detection_delay": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        },
     },
     "Crypto": {
         "Direct": {
@@ -114,6 +139,12 @@ DATASETS = {
             'num_drops': [1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1021, 1015, 456],
             "exec_time":   [22.03, 22.25, 22.05, 22.17, 21.75, 22.64, 21.71, 22.05, 21.88, 21.64, 22.05, 22.62, 22.31, 21.95, 21.78],
             "detection_delay": [3238.19629, 3238.19397, 3238.19629, 3238.19629, 3238.19486, 3238.19629, 3238.19585, 3238.19629, 3238.20277, 3238.19588, 3238.26112, 3238.19629, 3238.20480, 3238.20239, 3260.18691],
+        },
+        "Sorted": {
+            "num_results": [190325,190325,190325,190325,190325,190325,190325,190325,190325,190325,190325,190325,190325,190325,190325],
+            "num_drops": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "exec_time": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "detection_delay": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         },
     },
 }
@@ -242,6 +273,22 @@ def build_tables():
                 data[impl_name] = implementations.get(impl_name, {}).get(metric, [])
             tables[metric] = pd.DataFrame(data)
 
+        # Derived: percent of Sorted results
+        if "Sorted" in tables["num_results"].columns:
+            sorted_series = pd.Series(
+                tables["num_results"]["Sorted"].values,
+                index=range(len(QUARANTINE_TIMES))
+            )
+            pct_data = {"Quarantine Time (s)": QUARANTINE_TIMES}
+            for impl in [i for i in IMPLEMENTATIONS if i != "Sorted"]:
+                impl_series = pd.Series(
+                    tables["num_results"][impl].values,
+                    index=range(len(QUARANTINE_TIMES))
+                )
+                pct = (impl_series / sorted_series * 100).replace([np.inf, -np.inf], np.nan)
+                pct_data[f"{impl} (% of Sorted)"] = pct.values.tolist()
+            tables["sorted_pct"] = pd.DataFrame(pct_data)
+
         # Derived: combined jump (diff) and decay (% change) for all metrics per implementation
         jnd_data = {"Quarantine Time (s)": QUARANTINE_TIMES}
         for metric in ["num_results", "num_drops", "exec_time", "detection_delay"]:
@@ -281,26 +328,38 @@ def save_excel(all_dataset_tables, path):
     print(f"✓ Saved Excel: {path}")
 
 
+def save_excel_pct(all_dataset_tables, path):
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        for dataset_name, tables in all_dataset_tables.items():
+            if "sorted_pct" in tables:
+                df = tables["sorted_pct"].copy()
+                for col in df.columns[1:]:
+                    df[col] = df[col].apply(lambda x: f"{x:.4f}" if pd.notna(x) else x)
+                df.to_excel(writer, sheet_name=f"{dataset_name}", index=False)
+    print(f"✓ Saved Excel: {path}")
+
+
 def plot_lines(tables, metric, ylabel, filename, dataset_name):
     df = tables[metric]
     x = list(range(len(df["Quarantine Time (s)"])))
-    plt.figure(figsize=(14, 6))
-    series_names = list(df.columns[1:])
+    plt.figure(figsize=(12, 6))
+    series_names = [c for c in df.columns[1:] if c != "Sorted"]
     y_series = []
     for col in series_names:
         y_vals = df[col].values
         y_series.append(y_vals)
-        plt.plot(x, y_vals, marker="o", linewidth=2, label=col, markersize=6)
+        color = COLORS.get(col, None)
+        plt.plot(x, y_vals, marker="o", linewidth=2, label=col, markersize=6, color=color)
 
     _annotate_first_last_extremes(x, y_series)
-    plt.xticks(x, df["Quarantine Time (s)"], rotation=45)
+    plt.xticks(x, df["Quarantine Time (s)"], rotation=45, fontsize=8)
     plt.xlabel("Quarantine Time (s)", fontsize=11)
     plt.ylabel(ylabel, fontsize=11)
-    plt.title(f"{ylabel} vs Quarantine Time - {dataset_name}", fontsize=12, fontweight='bold')
+    plt.title(f"{ylabel} vs Quarantine Time - {dataset_name}", fontsize=13, fontweight='bold', pad=12)
     if metric == "exec_time":
         plt.ylim(bottom=0)
-    plt.grid(True, alpha=0.3)
-    plt.legend(fontsize=10)
+    plt.grid(True)
+    plt.legend(fontsize=9, loc='best')
     plt.tight_layout()
     out_path = os.path.join(OUTPUT_DIR, filename)
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
@@ -313,22 +372,23 @@ def plot_drops_enhanced(tables, dataset_name):
     x = list(range(len(df["Quarantine Time (s)"])))
     
     # Single plot with log scale for better visibility of differences
-    plt.figure(figsize=(14, 6))
-    series_names = list(df.columns[1:])
+    plt.figure(figsize=(12, 6))
+    series_names = [c for c in df.columns[1:] if c != "Sorted"]
     y_series = []
     for col in series_names:
         plotted_vals = [v + 1 for v in df[col]]
         y_series.append(plotted_vals)
-        plt.plot(x, plotted_vals, marker="o", linewidth=2, label=col, markersize=6)
+        color = COLORS.get(col, None)
+        plt.plot(x, plotted_vals, marker="o", linewidth=2, label=col, markersize=6, color=color)
 
     _annotate_first_last_extremes(x, [df[col].values for col in series_names])
-    plt.xticks(x, df["Quarantine Time (s)"], rotation=45)
-    plt.xlabel("Quarantine Time (s)", fontsize=12)
-    plt.ylabel("Dropped Events (log scale, +1)", fontsize=12)
-    plt.title(f"Dropped Events vs Quarantine Time (Log Scale) - {dataset_name}", fontsize=13, fontweight='bold')
+    plt.xticks(x, df["Quarantine Time (s)"], rotation=45, fontsize=8)
+    plt.xlabel("Quarantine Time (s)", fontsize=11)
+    plt.ylabel("Dropped Events (log scale, +1)", fontsize=11)
+    plt.title(f"Dropped Events vs Quarantine Time (Log Scale) - {dataset_name}", fontsize=13, fontweight='bold', pad=12)
     plt.yscale('log')
-    plt.grid(True, alpha=0.3, which="both")
-    plt.legend(fontsize=10)
+    plt.grid(True, which="both")
+    plt.legend(fontsize=9, loc='best')
     plt.tight_layout()
     
     safe_name = dataset_name.lower().replace(" ", "_")
@@ -337,63 +397,65 @@ def plot_drops_enhanced(tables, dataset_name):
     print(f"✓ Saved: {out_path}")
 
 
-def plot_lines_no_direct(tables, metric, ylabel, filename, dataset_name):
-    """Plot without Direct and Fixed-Time policies"""
+def plot_lines_top3(tables, metric, ylabel, filename, dataset_name):
+    """Plot top 3 quarantine implementations (jump_and_decay, max, Individual per event)"""
     df = tables[metric]
     # Filter out Direct and Fixed-Time columns
-    cols_to_plot = [col for col in df.columns[1:] if col not in ["Direct", "Fixed-Time"]]
+    cols_to_plot = [col for col in df.columns[1:] if col not in ["Direct", "Fixed-Time", "Sorted"]]
     x = list(range(len(df["Quarantine Time (s)"])))
-    plt.figure(figsize=(14, 6))
+    plt.figure(figsize=(12, 6))
     series_names = cols_to_plot
     y_series = []
     for col in series_names:
         y_vals = df[col].values
         y_series.append(y_vals)
-        plt.plot(x, y_vals, marker="o", linewidth=2, label=col, markersize=6)
+        color = COLORS.get(col, None)
+        plt.plot(x, y_vals, marker="o", linewidth=2, label=col, markersize=6, color=color)
 
     _annotate_first_last_extremes(x, y_series)
-    plt.xticks(x, df["Quarantine Time (s)"], rotation=45)
+    plt.xticks(x, df["Quarantine Time (s)"], rotation=45, fontsize=8)
     plt.xlabel("Quarantine Time (s)", fontsize=11)
     plt.ylabel(ylabel, fontsize=11)
-    plt.title(f"{ylabel} vs Quarantine Time (No Direct) - {dataset_name}", fontsize=12, fontweight='bold')
+    plt.title(f"{ylabel} vs Quarantine Time (Top 3) - {dataset_name}", fontsize=13, fontweight='bold', pad=12)
     if metric == "exec_time":
         plt.ylim(bottom=0)
-    plt.grid(True, alpha=0.3)
-    plt.legend(fontsize=10)
+    plt.grid(True)
+    plt.legend(fontsize=9, loc='best')
     plt.tight_layout()
     out_path = os.path.join(OUTPUT_DIR, filename)
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     print(f"✓ Saved: {out_path}")
 
 
-def plot_drops_enhanced_no_direct(tables, dataset_name):
-    """Create enhanced drops plot without Direct and Fixed-Time policies"""
+def plot_drops_enhanced_top3(tables, dataset_name):
+    """Create enhanced drops plot for top 3 quarantine implementations"""
     df = tables["num_drops"]
     # Filter out Direct and Fixed-Time columns
-    cols_to_plot = [col for col in df.columns[1:] if col not in ["Direct", "Fixed-Time"]]
+    cols_to_plot = [col for col in df.columns[1:] if col not in ["Direct", "Fixed-Time", "Sorted"]]
     x = list(range(len(df["Quarantine Time (s)"])))
     
     # Single plot with log scale for better visibility of differences
-    plt.figure(figsize=(14, 6))
+    plt.figure(figsize=(12, 6))
     series_names = cols_to_plot
     y_series = []
     for col in series_names:
         plotted_vals = [v + 1 for v in df[col]]
         y_series.append(plotted_vals)
-        plt.plot(x, plotted_vals, marker="o", linewidth=2, label=col, markersize=6)
+        color = COLORS.get(col, None)
+        plt.plot(x, plotted_vals, marker="o", linewidth=2, label=col, markersize=6, color=color)
 
     _annotate_first_last_extremes(x, [df[col].values for col in series_names])
-    plt.xticks(x, df["Quarantine Time (s)"], rotation=45)
-    plt.xlabel("Quarantine Time (s)", fontsize=12)
-    plt.ylabel("Dropped Events (log scale, +1)", fontsize=12)
-    plt.title(f"Dropped Events vs Quarantine Time (Log Scale, No Direct) - {dataset_name}", fontsize=13, fontweight='bold')
+    plt.xticks(x, df["Quarantine Time (s)"], rotation=45, fontsize=8)
+    plt.xlabel("Quarantine Time (s)", fontsize=11)
+    plt.ylabel("Dropped Events (log scale, +1)", fontsize=11)
+    plt.title(f"Dropped Events vs Quarantine Time (Log Scale, Top 3) - {dataset_name}", fontsize=13, fontweight='bold', pad=12)
     plt.yscale('log')
-    plt.grid(True, alpha=0.3, which="both")
-    plt.legend(fontsize=10)
+    plt.grid(True, which="both")
+    plt.legend(fontsize=9, loc='best')
     plt.tight_layout()
     
     safe_name = dataset_name.lower().replace(" ", "_")
-    out_path = os.path.join(OUTPUT_DIR, f"compare_{safe_name}_drops_enhanced_no_direct.png")
+    out_path = os.path.join(OUTPUT_DIR, f"compare_{safe_name}_drops_enhanced_top3.png")
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     print(f"✓ Saved: {out_path}")
 
@@ -407,11 +469,11 @@ def plot_all(all_dataset_tables):
         plot_lines(tables, "exec_time", "Execution Time (s)", f"compare_{safe_name}_exec_time.png", dataset_name)
         plot_lines(tables, "detection_delay", "Detection Delay (s)", f"compare_{safe_name}_detection_delay.png", dataset_name)
         
-        # New plots without Direct policy
-        plot_lines_no_direct(tables, "num_results", "Number of Results", f"compare_{safe_name}_results_no_direct.png", dataset_name)
-        plot_drops_enhanced_no_direct(tables, dataset_name)
-        plot_lines_no_direct(tables, "exec_time", "Execution Time (s)", f"compare_{safe_name}_exec_time_no_direct.png", dataset_name)
-        plot_lines_no_direct(tables, "detection_delay", "Detection Delay (s)", f"compare_{safe_name}_detection_delay_no_direct.png", dataset_name)
+        # Top 3 quarantine implementations plots
+        plot_lines_top3(tables, "num_results", "Number of Results", f"compare_{safe_name}_results_top3.png", dataset_name)
+        plot_drops_enhanced_top3(tables, dataset_name)
+        plot_lines_top3(tables, "exec_time", "Execution Time (s)", f"compare_{safe_name}_exec_time_top3.png", dataset_name)
+        plot_lines_top3(tables, "detection_delay", "Detection Delay (s)", f"compare_{safe_name}_detection_delay_top3.png", dataset_name)
 
 
 def print_tables(all_dataset_tables):
@@ -431,6 +493,9 @@ def print_tables(all_dataset_tables):
         print(tables["jump_and_decay"].to_string(index=False))
         print("\n=== Max values across quarantine times ===")
         print(tables["max"].to_string(index=False))
+        if "sorted_pct" in tables:
+            print("\n=== % Results vs Sorted (num_results) ===")
+            print(tables["sorted_pct"].to_string(index=False))
 
 
 if __name__ == "__main__":
@@ -439,6 +504,8 @@ if __name__ == "__main__":
     print_tables(all_dataset_tables)
     excel_path = os.path.join(OUTPUT_DIR, "compare_new_impl.xlsx")
     save_excel(all_dataset_tables, excel_path)
+    excel_pct_path = os.path.join(OUTPUT_DIR, "compare_new_impl_sorted_pct.xlsx")
+    save_excel_pct(all_dataset_tables, excel_pct_path)
     plot_all(all_dataset_tables)
     print("\n" + "="*80)
     print("Done! Update the DATASETS section with your real measurements if needed.")

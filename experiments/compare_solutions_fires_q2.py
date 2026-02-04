@@ -10,6 +10,16 @@ import os
 
 OUTPUT_DIR = "comparison"
 
+# Color scheme for consistent coloring across all plots
+COLORS = {
+    "MAX (window max)": "#d62728",  
+    "EMA on max (α=0.1)": "#e377c2",  
+    "Jump-and-Decay (α=0.1)": "#2ca02c",  
+    "p99 + EMA (α=0.1)": "#7f7f7f",  
+    "Mean (window average)": "#bcbd22", 
+    "Individual quarantine per event type": "#9467bd", 
+}
+
 def _annotate_first_last_extremes(x_pos, all_solutions_values):
     """Annotate global min/max at first, middle, and last x positions across all solutions."""
     if not all_solutions_values or not x_pos:
@@ -196,12 +206,11 @@ def plot_all_solutions(dfs, solutions):
     """Create multi-line plots comparing all solutions"""
     
     # Define colors for each solution
-    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown']
     markers = ['o', 's', '^', 'D', 'v', 'p']
     
     # Attach colors to solutions for annotation
     for idx, sol in enumerate(solutions):
-        sol['_color'] = colors[idx % len(colors)]
+        sol['_color'] = COLORS.get(sol['name'], 'tab:gray')
     
     # Get quarantine times from the first solution
     quarantine_times = solutions[0]['quarantine_times']
@@ -212,9 +221,10 @@ def plot_all_solutions(dfs, solutions):
     
     all_results = []
     for idx, solution in enumerate(solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['num_results'], 
                 marker=markers[idx], linestyle='-', linewidth=2,
-                color=colors[idx], label=solution['name'], markersize=8)
+                color=color, label=solution['name'], markersize=8)
         all_results.append(solution['num_results'])
     
     _annotate_first_last_extremes(x_pos, all_results)
@@ -236,9 +246,10 @@ def plot_all_solutions(dfs, solutions):
     
     all_drops = []
     for idx, solution in enumerate(solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['num_drops'], 
                 marker=markers[idx], linestyle='-', linewidth=2,
-                color=colors[idx], label=solution['name'], markersize=8)
+                color=color, label=solution['name'], markersize=8)
         all_drops.append(solution['num_drops'])
     
     _annotate_first_last_extremes(x_pos, all_drops)
@@ -260,9 +271,10 @@ def plot_all_solutions(dfs, solutions):
     
     all_exec_time = []
     for idx, solution in enumerate(solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['exec_time'], 
                 marker=markers[idx], linestyle='-', linewidth=2,
-                color=colors[idx], label=solution['name'], markersize=8)
+                color=color, label=solution['name'], markersize=8)
         all_exec_time.append(solution['exec_time'])
     
     _annotate_first_last_extremes(x_pos, all_exec_time)
@@ -284,9 +296,10 @@ def plot_all_solutions(dfs, solutions):
     
     all_detection_delay = []
     for idx, solution in enumerate(solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['detection_delay'], 
                 marker=markers[idx], linestyle='-', linewidth=2,
-                color=colors[idx], label=solution['name'], markersize=8)
+                color=color, label=solution['name'], markersize=8)
         all_detection_delay.append(solution['detection_delay'])
     
     _annotate_first_last_extremes(x_pos, all_detection_delay)
@@ -309,9 +322,10 @@ def plot_all_solutions(dfs, solutions):
     
     # Results Found
     for idx, solution in enumerate(solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         axes[0].plot(x_pos, solution['num_results'], 
                        marker=markers[idx], linestyle='-', linewidth=2,
-                       color=colors[idx], label=solution['name'], markersize=7)
+                       color=color, label=solution['name'], markersize=7)
     
     axes[0].set_xticks(x_pos)
     axes[0].set_xticklabels([str(t) for t in quarantine_times], fontsize=8, rotation=45)
@@ -323,9 +337,10 @@ def plot_all_solutions(dfs, solutions):
     
     # Drops
     for idx, solution in enumerate(solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         axes[1].plot(x_pos, solution['num_drops'], 
                        marker=markers[idx], linestyle='-', linewidth=2,
-                       color=colors[idx], label=solution['name'], markersize=7)
+                       color=color, label=solution['name'], markersize=7)
     
     axes[1].set_xticks(x_pos)
     axes[1].set_xticklabels([str(t) for t in quarantine_times], fontsize=8, rotation=45)
@@ -349,7 +364,6 @@ def plot_top_three(solutions):
         'Individual quarantine per event type',
     ]
     top_solutions = [s for s in solutions if s['name'] in top_names]
-    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:brown']
     markers = ['o', 's', '^', 'D']
     quarantine_times = top_solutions[0]['quarantine_times']
     x_pos = range(len(quarantine_times))
@@ -359,9 +373,10 @@ def plot_top_three(solutions):
     x_pos = list(range(len(quarantine_times)))
     all_results = []
     for idx, solution in enumerate(top_solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['num_results'],
                  marker=markers[idx % len(markers)], linestyle='-', linewidth=2,
-                 color=colors[idx % len(colors)], label=solution['name'], markersize=7)
+                 color=color, label=solution['name'], markersize=7)
         all_results.append(solution['num_results'])
     _annotate_first_last_extremes(x_pos, all_results)
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
@@ -378,9 +393,10 @@ def plot_top_three(solutions):
     plt.figure(figsize=(12, 6))
     all_drops = []
     for idx, solution in enumerate(top_solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['num_drops'],
                  marker=markers[idx % len(markers)], linestyle='-', linewidth=2,
-                 color=colors[idx % len(colors)], label=solution['name'], markersize=7)
+                 color=color, label=solution['name'], markersize=7)
         all_drops.append(solution['num_drops'])
     _annotate_first_last_extremes(x_pos, all_drops)
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
@@ -397,9 +413,10 @@ def plot_top_three(solutions):
     plt.figure(figsize=(12, 6))
     all_exec_time = []
     for idx, solution in enumerate(top_solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['exec_time'],
                  marker=markers[idx % len(markers)], linestyle='-', linewidth=2,
-                 color=colors[idx % len(colors)], label=solution['name'], markersize=7)
+                 color=color, label=solution['name'], markersize=7)
         all_exec_time.append(solution['exec_time'])
     _annotate_first_last_extremes(x_pos, all_exec_time)
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
@@ -417,9 +434,10 @@ def plot_top_three(solutions):
     plt.figure(figsize=(12, 6))
     all_detection_delay = []
     for idx, solution in enumerate(top_solutions):
+        color = COLORS.get(solution['name'], 'tab:gray')
         plt.plot(x_pos, solution['detection_delay'],
                  marker=markers[idx % len(markers)], linestyle='-', linewidth=2,
-                 color=colors[idx % len(colors)], label=solution['name'], markersize=7)
+                 color=color, label=solution['name'], markersize=7)
         all_detection_delay.append(solution['detection_delay'])
     _annotate_first_last_extremes(x_pos, all_detection_delay)
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)

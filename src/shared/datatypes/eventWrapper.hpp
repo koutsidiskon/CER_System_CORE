@@ -171,6 +171,18 @@ class EventWrapper {
     return *event;
   }
 
+  std::size_t size_bytes() const {
+    std::size_t total = sizeof(EventWrapper);
+    if (event) {
+      total += event->size_bytes();
+    }
+    if (marked_variables.has_value()) {
+      const auto& value = marked_variables.value();
+      total += mpz_size(value.get_mpz_t()) * sizeof(mp_limb_t);
+    }
+    return total;
+  }
+
   std::string to_json() const {
     LOG_TRACE_L3(logger, "Converting EventWrapper with id {} to JSON", id);
     assert(!moved);

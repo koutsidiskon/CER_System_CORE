@@ -29,7 +29,10 @@ class WaitFixedTimePolicy : public BasePolicy {
     last_save = std::chrono::system_clock::now();
   int drops = 0;
   int received_events = 0;
-  int sent_events = 0;  
+  int sent_events = 0;
+  size_t max_quarantine_size = 0;
+  size_t current_quarantine_bytes = 0;
+  size_t max_quarantine_bytes = 0;
 
   // Corresponds to the last time an event was sent
   Types::IntValue last_time_sent = Types::IntValue::create_lower_bound();
@@ -104,7 +107,15 @@ class WaitFixedTimePolicy : public BasePolicy {
                   event.get_primary_time().val);
       return;
     }
+    const std::size_t event_size_bytes = event.size_bytes();
     events.insert(std::move(event));
+    current_quarantine_bytes += event_size_bytes;
+    if (events.size() > max_quarantine_size) {
+      max_quarantine_size = events.size();
+    }
+    if (current_quarantine_bytes > max_quarantine_bytes) {
+      max_quarantine_bytes = current_quarantine_bytes;
+    }
   }
 
   bool is_events_empty() override {
@@ -137,6 +148,7 @@ class WaitFixedTimePolicy : public BasePolicy {
         assert(event.get_primary_time().val >= last_time_sent.val
                && "Event time is not after last time sent");
         auto internal_node = events.extract(iter++);
+        current_quarantine_bytes -= internal_node.value().size_bytes();
         last_time_sent = internal_node.value().get_primary_time();
         this->send_event_queue.enqueue(std::move(internal_node.value()));
       } else {
@@ -151,11 +163,17 @@ class WaitFixedTimePolicy : public BasePolicy {
     for (auto iter = events.begin(); iter != events.end();) {
       sent_events++;
       auto internal_node = events.extract(iter++);
+      current_quarantine_bytes -= internal_node.value().size_bytes();
       this->send_event_queue.enqueue(std::move(internal_node.value()));
     }
     std::cout << "Number of events RECEIVED by quarantine: " << received_events << std::endl;
     std::cout << "Number of events SENT by quarantine: " << sent_events << std::endl;
     std::cout << "Number of events DROPPED by quarantine: " << drops << std::endl;
+    std::cout << "Maximum quarantine size: " << max_quarantine_size << std::endl;
+    const double bytes_per_mb = 1024.0 * 1024.0;
+    std::cout << "Maximum quarantine buffer size (MB): "
+              << (static_cast<double>(max_quarantine_bytes) / bytes_per_mb)
+              << std::endl;
   }
 };
 }  // namespace CORE::Internal::Interface::Module::Quarantine

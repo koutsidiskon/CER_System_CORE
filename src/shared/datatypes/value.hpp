@@ -15,6 +15,7 @@ struct Value {
   virtual std::string to_string() const = 0;
   virtual std::string to_json() const = 0;
   virtual std::string get_type() const = 0;
+  virtual std::size_t size_bytes() const = 0;
 
   virtual bool operator==(const Value& other) const = 0;
 };
@@ -155,6 +156,10 @@ struct StringValue final : public Value {
     return other_ptr != nullptr && this->val == other_ptr->val;
   }
 
+  std::size_t size_bytes() const override {
+    return sizeof(StringValue) + val.capacity();
+  }
+
   template <class Archive>
   void serialize(Archive& archive) {
     archive(val);
@@ -189,6 +194,8 @@ struct IntValue final : public Value {
     return other_ptr != nullptr && this->val == other_ptr->val;
   }
 
+  std::size_t size_bytes() const override { return sizeof(IntValue); }
+
   template <class Archive>
   void serialize(Archive& archive) {
     archive(val);
@@ -218,6 +225,8 @@ struct DoubleValue final : public Value {
     const auto* other_ptr = dynamic_cast<const DoubleValue*>(&other);
     return other_ptr != nullptr && this->val == other_ptr->val;
   }
+
+  std::size_t size_bytes() const override { return sizeof(DoubleValue); }
 
   template <class Archive>
   void serialize(Archive& archive) {
@@ -249,6 +258,8 @@ struct BoolValue final : public Value {
     return other_ptr != nullptr && this->val == other_ptr->val;
   }
 
+  std::size_t size_bytes() const override { return sizeof(BoolValue); }
+
   template <class Archive>
   void serialize(Archive& archive) {
     archive(val);
@@ -278,6 +289,8 @@ struct DateValue final : public Value {
     const auto* other_ptr = dynamic_cast<const DateValue*>(&other);
     return other_ptr != nullptr && this->val == other_ptr->val;
   }
+
+  std::size_t size_bytes() const override { return sizeof(DateValue); }
 
   template <class Archive>
   void serialize(Archive& archive) {

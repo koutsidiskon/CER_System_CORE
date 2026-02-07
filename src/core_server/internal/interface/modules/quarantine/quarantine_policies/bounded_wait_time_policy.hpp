@@ -5,6 +5,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
+#include <iostream>
 #include <cstdint>
 #include <mutex>
 #include <optional>
@@ -37,6 +38,10 @@ class BoundedWaitTimePolicy : public BasePolicy {
 
   // Store time deltas while taking the median
   std::vector<std::chrono::duration<int64_t, std::nano>> measured_time_deltas;
+
+  size_t max_quarantine_size = 0;
+  size_t current_quarantine_bytes = 0;
+  size_t max_quarantine_bytes = 0;
 
   // Time difference between received time and system clock
   std::optional<std::chrono::duration<int64_t, std::nano>>
@@ -146,8 +151,16 @@ class BoundedWaitTimePolicy : public BasePolicy {
                  event.get_primary_time().val,
                  events_received - 1);
 
+    const std::size_t event_size_bytes = event.size_bytes();
     [[maybe_unused]] std::size_t events_size_before = events.size();
     events.insert(std::move(event));
+    current_quarantine_bytes += event_size_bytes;
+    if (events.size() > max_quarantine_size) {
+      max_quarantine_size = events.size();
+    }
+    if (current_quarantine_bytes > max_quarantine_bytes) {
+      max_quarantine_bytes = current_quarantine_bytes;
+    }
     [[maybe_unused]] std::size_t events_size_after = events.size();
     assert(events_size_after == events_size_before + 1
            && "Event was not added to events in BoundedWaitTimePolicy::receive_event");
@@ -198,6 +211,7 @@ class BoundedWaitTimePolicy : public BasePolicy {
         assert(event.get_primary_time().val >= last_time_sent.val
                && "Event time is not after last time sent");
         auto internal_node = events.extract(iter++);
+        current_quarantine_bytes -= internal_node.value().size_bytes();
         last_time_sent = internal_node.value().get_primary_time();
         this->send_event_queue.enqueue(std::move(internal_node.value()));
       } else {
@@ -211,8 +225,14 @@ class BoundedWaitTimePolicy : public BasePolicy {
     std::lock_guard<std::mutex> lock(events_lock);
     for (auto iter = events.begin(); iter != events.end();) {
       auto internal_node = events.extract(iter++);
+      current_quarantine_bytes -= internal_node.value().size_bytes();
       this->send_event_queue.enqueue(std::move(internal_node.value()));
     }
+    const double bytes_per_mb = 1024.0 * 1024.0;
+    std::cout << "Maximum quarantine size: " << max_quarantine_size << std::endl;
+    std::cout << "Maximum quarantine buffer size (MB): "
+              << (static_cast<double>(max_quarantine_bytes) / bytes_per_mb)
+              << std::endl;
   }
 };
 }  // namespace CORE::Internal::Interface::Module::Quarantine

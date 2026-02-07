@@ -134,6 +134,17 @@ struct Event {
     return out;
   }
 
+  std::size_t size_bytes() const {
+    std::size_t total = sizeof(Event);
+    total += attributes.capacity() * sizeof(std::unique_ptr<Types::Value>);
+    for (const auto& attr : attributes) {
+      if (attr) {
+        total += attr->size_bytes();
+      }
+    }
+    return total;
+  }
+
   std::string to_json_with_attribute_projection(
     std::vector<bool> attribute_projection,
     std::function<Types::StreamTypeId(Types::UniqueEventTypeId)>

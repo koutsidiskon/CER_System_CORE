@@ -32,7 +32,10 @@ class DynamicTimePolicy: public BasePolicy {
     std::chrono::time_point<std::chrono::system_clock> last_save = std::chrono::system_clock::now();
     int drops = 0;
     int received_events = 0;
-    int sent_events = 0;  
+    int sent_events = 0;
+    size_t max_quarantine_size = 0;
+    size_t current_quarantine_bytes = 0;
+    size_t max_quarantine_bytes = 0;
     std::optional<int64_t> last_received_event_time;
     bool end_of_stream_received = false;
     std::map<Types::UniqueEventTypeId, double> dynamic_time_per_event_type;
@@ -110,7 +113,7 @@ class DynamicTimePolicy: public BasePolicy {
     if (event_gen_time < last_time_sent.val) {
       drops++;
 
-      std::cout << event.to_string() << std::endl;
+      std::cout << event.get_event_reference().to_string() << std::endl;
       
       LOG_WARNING(logger,
                  "Dropping out-of-order event. Current: {}, New: {}",
@@ -143,7 +146,15 @@ class DynamicTimePolicy: public BasePolicy {
       }
     }
 
+    const std::size_t event_size_bytes = event.size_bytes();
     events.insert(std::move(event));
+    current_quarantine_bytes += event_size_bytes;
+    if (events.size() > max_quarantine_size) {
+      max_quarantine_size = events.size();
+    }
+    if (current_quarantine_bytes > max_quarantine_bytes) {
+      max_quarantine_bytes = current_quarantine_bytes;
+    }
     try_add_tuples_to_send_queue();
   }
 
@@ -153,6 +164,7 @@ class DynamicTimePolicy: public BasePolicy {
         auto iter = events.begin();
         sent_events++;
         auto internal_node = events.extract(iter);
+      current_quarantine_bytes -= internal_node.value().size_bytes();
         this->send_event_queue.enqueue(std::move(internal_node.value()));
     }
     end_of_stream_received = true;
@@ -187,6 +199,7 @@ class DynamicTimePolicy: public BasePolicy {
                 && "Event time is not after last time sent");
         
         auto internal_node = events.extract(iter++);
+        current_quarantine_bytes -= internal_node.value().size_bytes();
         last_time_sent = internal_node.value().get_primary_time();
         this->send_event_queue.enqueue(std::move(internal_node.value()));
       } else {
@@ -200,6 +213,11 @@ class DynamicTimePolicy: public BasePolicy {
     std::cout << "Number of events RECEIVED by quarantine: " << received_events << std::endl;
     std::cout << "Number of events SENT by quarantine: " << sent_events << std::endl;
     std::cout << "Number of events DROPPED by quarantine: " << drops << std::endl;
+    std::cout << "Maximum quarantine size: " << max_quarantine_size << std::endl;
+    const double bytes_per_mb = 1024.0 * 1024.0;
+    std::cout << "Maximum quarantine buffer size (MB): "
+              << (static_cast<double>(max_quarantine_bytes) / bytes_per_mb)
+              << std::endl;
   }
 };
 }  // namespace CORE::Internal::Interface::Module::Quarantine

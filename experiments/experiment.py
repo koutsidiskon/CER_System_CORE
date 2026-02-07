@@ -9,7 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "direct"
 BUILD = (sys.argv[2].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q4.txt"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q3.txt"
 DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/crypto.core"
 CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
 OPTIONS = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/crypto/crypto_quarantine.core"
@@ -74,6 +74,8 @@ def run_test(description, cmd, query_contents, options_contents=None):
     received = 0
     sent = 0
     avg_detection_delay = 0.0
+    max_quarantine_size = 0
+    max_quarantine_size_mb = 0.0
 
     t0 = time.perf_counter()
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -124,7 +126,16 @@ def run_test(description, cmd, query_contents, options_contents=None):
                     match = re.search(r"([\d.]+)", line) 
                     if match:
                         avg_detection_delay = float(match.group(1))
+                elif line.startswith("Maximum quarantine size: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        max_quarantine_size = int(match.group(1))
+                elif line.startswith("Maximum quarantine buffer size (MB): "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        max_quarantine_size_mb = float(match.group(1))
                 quarantine_file.write(f"{line}\n")
+
     
     if options_contents is None:
         num_results = sum(1 for line in result.stdout.splitlines() if line.strip().startswith('['))
@@ -144,7 +155,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
     else:
         print(f"❌ NO REORDERING: Events sent in same order as received")
 
-    return received_order, sent_order, complex_events, elapsed_time,avg_detection_delay
+    return received_order, sent_order, complex_events, elapsed_time, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb
 
 if __name__ == "__main__":
     if subprocess.call(["docker", "image", "inspect", IMG_LOCAL], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL):
@@ -172,12 +183,14 @@ if __name__ == "__main__":
         print(f"Average detection delay   : {avg_detection_delay:.9f}s")
     elif MODE == "wait":
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
-        received_wait, sent_wait,complex_events, core_time, avg_detection_delay = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait,complex_events, core_time, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         print("\n🔍 Results:")
         print(f"Number of input events : {count_events(CSV_PATH)}")
         print(f"Number of results      : {len(complex_events)}")
         print(f"Query execution time   : {core_time:.2f}s")
         print(f"Average detection delay   : {avg_detection_delay:.9f}s")
+        print(f"Maximum quarantine size: {max_quarantine_size}")
+        print(f"Maximum quarantine buffer size (MB): {max_quarantine_size_mb}")
     elif MODE == "compare":
         cmd_direct = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITHOUT_QUARANTINE]
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]

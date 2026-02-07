@@ -19,6 +19,8 @@
 #include <utility>
 #include <chrono>
 #include <vector>
+#include <cmath>
+#include <algorithm>
 
 #include "core_server/internal/coordination/query_catalog.hpp"
 #include "core_server/internal/evaluation/enumeration/tecs/enumerator.hpp"
@@ -73,17 +75,64 @@ class OfflineResultHandler : public ResultHandler {
  private:
   size_t total_events = 0;
   double total_detection_delay = 0.0;
+  std::vector<double> detection_delays;  // Store all delays for statistics
 
  public:
   OfflineResultHandler() : ResultHandler(ResultHandlerType::OFFLINE) {}
 
   ~OfflineResultHandler() override {
     // Print summary when handler is destroyed
-    if (total_events > 0) {
+    if (total_events > 0 && !detection_delays.empty()) {
       std::cout << "\n=== FINAL SUMMARY ===\n";
       std::cout << "Total events processed: " << total_events << "\n";
+      
+      // Calculate average
+      double average = total_detection_delay / total_events;
       std::cout << "Average detection delay: " << std::fixed << std::setprecision(9) 
-                << (total_detection_delay / total_events) << "s\n";
+                << average << "s\n";
+      
+      // Calculate standard deviation
+      double variance = 0.0;
+      for (const auto& delay : detection_delays) {
+        double diff = delay - average;
+        variance += diff * diff;
+      }
+      variance /= total_events;
+      double std_deviation = std::sqrt(variance);
+      
+      std::cout << "Standard deviation: " << std::fixed << std::setprecision(9) 
+                << std_deviation << "s\n";
+      
+      // Sort delays for percentile calculations
+      std::vector<double> sorted_delays = detection_delays;
+      std::sort(sorted_delays.begin(), sorted_delays.end());
+      
+      // Calculate min and max
+      double min_delay = sorted_delays.front();
+      double max_delay = sorted_delays.back();
+      
+      // Calculate median
+      double median_delay;
+      size_t n = sorted_delays.size();
+      if (n % 2 == 0) {
+        median_delay = (sorted_delays[n/2 - 1] + sorted_delays[n/2]) / 2.0;
+      } else {
+        median_delay = sorted_delays[n/2];
+      }
+      
+      // Calculate 95th percentile
+      size_t percentile_95_idx = static_cast<size_t>(std::ceil(0.95 * n)) - 1;
+      if (percentile_95_idx >= n) percentile_95_idx = n - 1;
+      double percentile_95 = sorted_delays[percentile_95_idx];
+      
+      std::cout << "Median detection delay: " << std::fixed << std::setprecision(9) 
+                << median_delay << "s\n";
+      std::cout << "Min detection delay: " << std::fixed << std::setprecision(9) 
+                << min_delay << "s\n";
+      std::cout << "Max detection delay: " << std::fixed << std::setprecision(9) 
+                << max_delay << "s\n";
+      std::cout << "95th percentile detection delay: " << std::fixed << std::setprecision(9) 
+                << percentile_95 << "s\n";
       std::cout << "====================\n";
     }
   }
@@ -155,6 +204,7 @@ class OfflineResultHandler : public ResultHandler {
         }
         
         total_detection_delay += detection_delay;
+        detection_delays.push_back(detection_delay);  // Store for statistics
         total_events++;
         
         // Print individual event details

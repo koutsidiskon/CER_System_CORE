@@ -3,8 +3,6 @@ Quarantine size analysis (MB vs number of events) across datasets and policies.
 
 Usage:
   python quarantine_size_analysis.py
-
-Edit the DATA section to plug in your actual results.
 """
 import os
 from typing import Dict, List
@@ -12,18 +10,19 @@ from typing import Dict, List
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# ==================== DATA (EDIT THESE) ====================
-# Quarantine sizes (MB) used in your runs
-QUARANTINE_SIZES_MB: List[float] = [1, 2, 4, 8, 16, 32, 64]
+# ==================== DATA ====================
 
 # Policies to plot (order controls legend order)
 POLICIES: List[str] = [
     "Direct",
-    "Fixed-Time",
-    "jump_and_decay",
-    "max",
-    "Individual per event",
     "Sorted",
+    "Fixed-Time",
+    "AVG",
+    "p99",
+    "EMA on max",
+    "max",
+    "jump_and_decay",
+    "Individual per event",
 ]
 
 # Color scheme for consistent coloring across all plots
@@ -34,38 +33,130 @@ COLORS = {
     "max": "#d62728",
     "Individual per event": "#9467bd",
     "Sorted": "#8c564b",
+    "AVG": "#bcbd22",
+    "EMA on max": "#e377c2",
+    "p99": "#7f7f7f",
 }
 
-# DATASETS structure:
-# DATASETS[dataset_name][policy_name] = {
-#     "size_mb": [...],      # quarantine size in MB for each point
-#     "num_events": [...],    # number of events inside quarantine
-# }
 DATASETS: Dict[str, Dict[str, Dict[str, List[float]]]] = {
     "Fires": {
         "Direct": {
-            "size_mb": [1, 2, 4, 8, 16, 32, 64],
-            "num_events": [0, 0, 0, 0, 0, 0, 0],
+            "size_mb": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "num_events": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        },
+        "Sorted": {
+            "size_mb": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "num_events": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         },
         "Fixed-Time": {
-            "size_mb": [1, 2, 4, 8, 16, 32, 64],
-            "num_events": [0, 0, 0, 0, 0, 0, 0],
+            "size_mb": [0.0034, 0.0034, 0.0034, 0.0034, 0.0034, 0.0034, 0.0037, 0.0041, 0.0048, 0.0082, 0.0219, 0.0357, 0.0676, 0.1278, 0.1386],
+            "num_events": [9, 9, 9, 9, 9, 9, 10, 11, 13, 22, 59, 96, 182, 344, 373],
+        },
+        "AVG": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "p99": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "EMA on max": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "max": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "jump_and_decay": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "Individual per event": {
+            "size_mb": [],
+            "num_events": [],
         },
     },
     "Aviation": {
         "Direct": {
-            "size_mb": [1, 2, 4, 8, 16, 32, 64],
-            "num_events": [0, 0, 0, 0, 0, 0, 0],
+            "size_mb": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "num_events": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        },
+        "Sorted": {
+            "size_mb": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "num_events": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         },
         "Fixed-Time": {
-            "size_mb": [1, 2, 4, 8, 16, 32, 64],
-            "num_events": [0, 0, 0, 0, 0, 0, 0],
+            "size_mb": [0.2420, 0.2420, 0.2420, 0.2420, 0.2420, 0.2420, 0.2758, 0.3875, 0.6664, 1.4783, 2.8295, 4.4478, 5.9230, 9.3298, 11.4782],
+            "num_events": [394, 394, 394, 394, 394, 394, 449, 631, 1085, 2407, 4607, 7242, 9644, 15191, 18689],
+        },
+        "AVG": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "p99": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "EMA on max": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "max": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "jump_and_decay": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "Individual per event": {
+            "size_mb": [],
+            "num_events": [],
+        },
+    },
+    "Crypto": {
+        "Direct": {
+            "size_mb": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "num_events": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        },
+        "Sorted": {
+            "size_mb": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            "num_events": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        },
+        "Fixed-Time": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "AVG": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "p99": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "EMA on max": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "max": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "jump_and_decay": {
+            "size_mb": [],
+            "num_events": [],
+        },
+        "Individual per event": {
+            "size_mb": [],
+            "num_events": [],
         },
     },
 }
 # ===========================================================
 
-OUTPUT_DIR = "compared_with_original"
+OUTPUT_DIR = os.path.join("experiments", "compared_with_original")
 
 
 def _validate_dataset(dataset_name: str, policy_data: Dict[str, Dict[str, List[float]]]) -> None:
@@ -79,15 +170,33 @@ def _validate_dataset(dataset_name: str, policy_data: Dict[str, Dict[str, List[f
             )
 
 
+def _get_size_axis(dataset_name: str, policy_data: Dict[str, Dict[str, List[float]]]) -> List[float]:
+    if not policy_data:
+        raise ValueError(f"{dataset_name} has no policy data.")
+
+    first_policy = next(iter(policy_data))
+    size_axis = policy_data[first_policy]["size_mb"]
+
+    for policy, metrics in policy_data.items():
+        if metrics["size_mb"] != size_axis:
+            raise ValueError(
+                f"{dataset_name}/{policy} has a different 'size_mb' axis than '{first_policy}'."
+            )
+
+    return size_axis
+
+
 def build_tables() -> Dict[str, pd.DataFrame]:
     tables = {}
     for dataset_name, policy_data in DATASETS.items():
         _validate_dataset(dataset_name, policy_data)
 
-        # Ensure we have a unified size axis. Use QUARANTINE_SIZES_MB by default.
-        data = {"Quarantine Size (MB)": QUARANTINE_SIZES_MB}
+        size_axis = _get_size_axis(dataset_name, policy_data)
+        data = {"Quarantine Size (MB)": size_axis}
         for policy in POLICIES:
             series = policy_data.get(policy, {}).get("num_events", [])
+            if series == []:
+                series = [None] * len(size_axis)
             data[policy] = series
         tables[dataset_name] = pd.DataFrame(data)
     return tables

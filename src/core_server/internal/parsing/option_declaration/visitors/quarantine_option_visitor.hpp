@@ -41,9 +41,44 @@ class QuarantineOptionVisitor : public OptionDeclarationParserBaseVisitor {
     return {};
   }
 
-  std::any visitDynamic_time_policy(OptionDeclarationParser::Dynamic_time_policyContext* ctx) override {
+  std::any visitAvg_dynamic_time_policy(OptionDeclarationParser::Avg_dynamic_time_policyContext* ctx) override {
     policy_type = Interface::Module::Quarantine::QuarantinePolicy::QuarantinePolicyType::
-      DynamicTimePolicy;
+      AvgDynamicPolicy;
+    visitChildren(ctx);
+    return {};
+  }
+
+  std::any visitJad_dynamic_time_policy(OptionDeclarationParser::Jad_dynamic_time_policyContext* ctx) override {
+    policy_type = Interface::Module::Quarantine::QuarantinePolicy::QuarantinePolicyType::
+      JadDynamicPolicy;
+    visitChildren(ctx);
+    return {};
+  }
+
+  std::any visitMax_dynamic_time_policy(OptionDeclarationParser::Max_dynamic_time_policyContext* ctx) override {
+    policy_type = Interface::Module::Quarantine::QuarantinePolicy::QuarantinePolicyType::
+      MaxDynamicPolicy;
+    visitChildren(ctx);
+    return {};
+  }
+
+  std::any visitMax_ema_dynamic_time_policy(OptionDeclarationParser::Max_ema_dynamic_time_policyContext* ctx) override {
+    policy_type = Interface::Module::Quarantine::QuarantinePolicy::QuarantinePolicyType::
+      MaxEmaDynamicPolicy;
+    visitChildren(ctx);
+    return {};
+  }
+
+  std::any visitP99_dynamic_time_policy(OptionDeclarationParser::P99_dynamic_time_policyContext* ctx) override {
+    policy_type = Interface::Module::Quarantine::QuarantinePolicy::QuarantinePolicyType::
+      P99DynamicPolicy;
+    visitChildren(ctx);
+    return {};
+  }
+
+  std::any visitPer_event_dynamic_time_policy(OptionDeclarationParser::Per_event_dynamic_time_policyContext* ctx) override {
+    policy_type = Interface::Module::Quarantine::QuarantinePolicy::QuarantinePolicyType::
+      PerEventDynamicPolicy;
     visitChildren(ctx);
     return {};
   }

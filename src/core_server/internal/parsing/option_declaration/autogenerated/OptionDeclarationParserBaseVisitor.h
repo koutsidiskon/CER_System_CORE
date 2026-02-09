@@ -43,7 +43,27 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDynamic_time_policy(OptionDeclarationParser::Dynamic_time_policyContext *ctx) override {
+  virtual std::any visitAvg_dynamic_time_policy(OptionDeclarationParser::Avg_dynamic_time_policyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitJad_dynamic_time_policy(OptionDeclarationParser::Jad_dynamic_time_policyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitMax_dynamic_time_policy(OptionDeclarationParser::Max_dynamic_time_policyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitMax_ema_dynamic_time_policy(OptionDeclarationParser::Max_ema_dynamic_time_policyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitP99_dynamic_time_policy(OptionDeclarationParser::P99_dynamic_time_policyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitPer_event_dynamic_time_policy(OptionDeclarationParser::Per_event_dynamic_time_policyContext *ctx) override {
     return visitChildren(ctx);
   }
 

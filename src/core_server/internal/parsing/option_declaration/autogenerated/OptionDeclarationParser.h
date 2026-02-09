@@ -13,10 +13,11 @@ class  OptionDeclarationParser : public antlr4::Parser {
 public:
   enum {
     WS = 1, K_CREATE = 2, K_QUARANTINE = 3, K_FIXED_TIME = 4, K_NEW_FIXED_TIME = 5, 
-    K_BOUNDED_TIME = 6, K_DYNAMIC_TIME = 7, K_DIRECT = 8, K_HOURS = 9, K_MINUTES = 10, 
-    K_SECONDS = 11, LEFT_CURLY_BRACKET = 12, RIGHT_CURLY_BRACKET = 13, COMMA = 14, 
-    DOUBLE_LITERAL = 15, INTEGER_LITERAL = 16, NUMERICAL_EXPONENT = 17, 
-    IDENTIFIER = 18, UNEXPECTED_CHAR = 19
+    K_AVG_DYNAMIC_TIME = 6, K_JAD_DYNAMIC_TIME = 7, K_MAX_DYNAMIC_TIME = 8, 
+    K_MAX_EMA_DYNAMIC_TIME = 9, K_P99_DYNAMIC_TIME = 10, K_PER_EVENT_DYNAMIC_TIME = 11, 
+    K_BOUNDED_TIME = 12, K_DIRECT = 13, K_HOURS = 14, K_MINUTES = 15, K_SECONDS = 16, 
+    LEFT_CURLY_BRACKET = 17, RIGHT_CURLY_BRACKET = 18, COMMA = 19, DOUBLE_LITERAL = 20, 
+    INTEGER_LITERAL = 21, NUMERICAL_EXPONENT = 22, IDENTIFIER = 23, UNEXPECTED_CHAR = 24
   };
 
   enum {
@@ -145,6 +146,32 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  Max_ema_dynamic_time_policyContext : public Quarantine_policyContext {
+  public:
+    Max_ema_dynamic_time_policyContext(Quarantine_policyContext *ctx);
+
+    antlr4::tree::TerminalNode *K_MAX_EMA_DYNAMIC_TIME();
+    Time_spanContext *time_span();
+    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
+    Stream_namesContext *stream_names();
+    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Per_event_dynamic_time_policyContext : public Quarantine_policyContext {
+  public:
+    Per_event_dynamic_time_policyContext(Quarantine_policyContext *ctx);
+
+    antlr4::tree::TerminalNode *K_PER_EVENT_DYNAMIC_TIME();
+    Time_spanContext *time_span();
+    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
+    Stream_namesContext *stream_names();
+    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  New_fixed_time_policyContext : public Quarantine_policyContext {
   public:
     New_fixed_time_policyContext(Quarantine_policyContext *ctx);
@@ -171,11 +198,50 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  Dynamic_time_policyContext : public Quarantine_policyContext {
+  class  Avg_dynamic_time_policyContext : public Quarantine_policyContext {
   public:
-    Dynamic_time_policyContext(Quarantine_policyContext *ctx);
+    Avg_dynamic_time_policyContext(Quarantine_policyContext *ctx);
 
-    antlr4::tree::TerminalNode *K_DYNAMIC_TIME();
+    antlr4::tree::TerminalNode *K_AVG_DYNAMIC_TIME();
+    Time_spanContext *time_span();
+    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
+    Stream_namesContext *stream_names();
+    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Jad_dynamic_time_policyContext : public Quarantine_policyContext {
+  public:
+    Jad_dynamic_time_policyContext(Quarantine_policyContext *ctx);
+
+    antlr4::tree::TerminalNode *K_JAD_DYNAMIC_TIME();
+    Time_spanContext *time_span();
+    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
+    Stream_namesContext *stream_names();
+    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Max_dynamic_time_policyContext : public Quarantine_policyContext {
+  public:
+    Max_dynamic_time_policyContext(Quarantine_policyContext *ctx);
+
+    antlr4::tree::TerminalNode *K_MAX_DYNAMIC_TIME();
+    Time_spanContext *time_span();
+    antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
+    Stream_namesContext *stream_names();
+    antlr4::tree::TerminalNode *RIGHT_CURLY_BRACKET();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  P99_dynamic_time_policyContext : public Quarantine_policyContext {
+  public:
+    P99_dynamic_time_policyContext(Quarantine_policyContext *ctx);
+
+    antlr4::tree::TerminalNode *K_P99_DYNAMIC_TIME();
     Time_spanContext *time_span();
     antlr4::tree::TerminalNode *LEFT_CURLY_BRACKET();
     Stream_namesContext *stream_names();

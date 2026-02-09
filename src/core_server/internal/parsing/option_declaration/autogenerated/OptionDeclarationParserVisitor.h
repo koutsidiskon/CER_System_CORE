@@ -33,7 +33,17 @@ public:
 
     virtual std::any visitNew_fixed_time_policy(OptionDeclarationParser::New_fixed_time_policyContext *context) = 0;
 
-    virtual std::any visitDynamic_time_policy(OptionDeclarationParser::Dynamic_time_policyContext *context) = 0;
+    virtual std::any visitAvg_dynamic_time_policy(OptionDeclarationParser::Avg_dynamic_time_policyContext *context) = 0;
+
+    virtual std::any visitJad_dynamic_time_policy(OptionDeclarationParser::Jad_dynamic_time_policyContext *context) = 0;
+
+    virtual std::any visitMax_dynamic_time_policy(OptionDeclarationParser::Max_dynamic_time_policyContext *context) = 0;
+
+    virtual std::any visitMax_ema_dynamic_time_policy(OptionDeclarationParser::Max_ema_dynamic_time_policyContext *context) = 0;
+
+    virtual std::any visitP99_dynamic_time_policy(OptionDeclarationParser::P99_dynamic_time_policyContext *context) = 0;
+
+    virtual std::any visitPer_event_dynamic_time_policy(OptionDeclarationParser::Per_event_dynamic_time_policyContext *context) = 0;
 
     virtual std::any visitStream_names(OptionDeclarationParser::Stream_namesContext *context) = 0;
 

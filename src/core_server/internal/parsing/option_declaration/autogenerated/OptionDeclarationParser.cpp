@@ -48,51 +48,64 @@ void optiondeclarationparserParserInitialize() {
       "any_name", "number", "integer", "double"
     },
     std::vector<std::string>{
-      "", "", "", "", "", "", "", "", "", "", "", "", "'{'", "'}'", "','"
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
+      "'{'", "'}'", "','"
     },
     std::vector<std::string>{
       "", "WS", "K_CREATE", "K_QUARANTINE", "K_FIXED_TIME", "K_NEW_FIXED_TIME", 
-      "K_BOUNDED_TIME", "K_DYNAMIC_TIME", "K_DIRECT", "K_HOURS", "K_MINUTES", 
-      "K_SECONDS", "LEFT_CURLY_BRACKET", "RIGHT_CURLY_BRACKET", "COMMA", 
-      "DOUBLE_LITERAL", "INTEGER_LITERAL", "NUMERICAL_EXPONENT", "IDENTIFIER", 
-      "UNEXPECTED_CHAR"
+      "K_AVG_DYNAMIC_TIME", "K_JAD_DYNAMIC_TIME", "K_MAX_DYNAMIC_TIME", 
+      "K_MAX_EMA_DYNAMIC_TIME", "K_P99_DYNAMIC_TIME", "K_PER_EVENT_DYNAMIC_TIME", 
+      "K_BOUNDED_TIME", "K_DIRECT", "K_HOURS", "K_MINUTES", "K_SECONDS", 
+      "LEFT_CURLY_BRACKET", "RIGHT_CURLY_BRACKET", "COMMA", "DOUBLE_LITERAL", 
+      "INTEGER_LITERAL", "NUMERICAL_EXPONENT", "IDENTIFIER", "UNEXPECTED_CHAR"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,19,121,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,24,151,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,1,0,1,0,
   	5,0,31,8,0,10,0,12,0,34,9,0,1,0,1,0,1,1,1,1,1,1,1,2,1,2,1,2,1,2,5,2,45,
   	8,2,10,2,12,2,48,9,2,1,2,1,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,
   	1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,
-  	3,1,3,3,3,81,8,3,1,4,1,4,1,4,5,4,86,8,4,10,4,12,4,89,9,4,1,5,3,5,92,8,
-  	5,1,5,3,5,95,8,5,1,5,3,5,98,8,5,1,6,1,6,1,6,1,7,1,7,1,7,1,8,1,8,1,8,1,
-  	9,1,9,1,10,1,10,1,11,1,11,3,11,115,8,11,1,12,1,12,1,13,1,13,1,13,0,0,
-  	14,0,2,4,6,8,10,12,14,16,18,20,22,24,26,0,0,118,0,32,1,0,0,0,2,37,1,0,
-  	0,0,4,40,1,0,0,0,6,80,1,0,0,0,8,82,1,0,0,0,10,91,1,0,0,0,12,99,1,0,0,
-  	0,14,102,1,0,0,0,16,105,1,0,0,0,18,108,1,0,0,0,20,110,1,0,0,0,22,114,
-  	1,0,0,0,24,116,1,0,0,0,26,118,1,0,0,0,28,31,3,4,2,0,29,31,3,2,1,0,30,
-  	28,1,0,0,0,30,29,1,0,0,0,31,34,1,0,0,0,32,30,1,0,0,0,32,33,1,0,0,0,33,
-  	35,1,0,0,0,34,32,1,0,0,0,35,36,5,0,0,1,36,1,1,0,0,0,37,38,5,19,0,0,38,
-  	39,6,1,-1,0,39,3,1,0,0,0,40,41,5,2,0,0,41,42,5,3,0,0,42,46,5,12,0,0,43,
-  	45,3,6,3,0,44,43,1,0,0,0,45,48,1,0,0,0,46,44,1,0,0,0,46,47,1,0,0,0,47,
-  	49,1,0,0,0,48,46,1,0,0,0,49,50,5,13,0,0,50,5,1,0,0,0,51,52,5,4,0,0,52,
-  	53,3,10,5,0,53,54,5,12,0,0,54,55,3,8,4,0,55,56,5,13,0,0,56,81,1,0,0,0,
-  	57,58,5,6,0,0,58,59,3,10,5,0,59,60,5,12,0,0,60,61,3,8,4,0,61,62,5,13,
-  	0,0,62,81,1,0,0,0,63,64,5,8,0,0,64,65,5,12,0,0,65,66,3,8,4,0,66,67,5,
-  	13,0,0,67,81,1,0,0,0,68,69,5,5,0,0,69,70,3,10,5,0,70,71,5,12,0,0,71,72,
-  	3,8,4,0,72,73,5,13,0,0,73,81,1,0,0,0,74,75,5,7,0,0,75,76,3,10,5,0,76,
-  	77,5,12,0,0,77,78,3,8,4,0,78,79,5,13,0,0,79,81,1,0,0,0,80,51,1,0,0,0,
-  	80,57,1,0,0,0,80,63,1,0,0,0,80,68,1,0,0,0,80,74,1,0,0,0,81,7,1,0,0,0,
-  	82,87,3,18,9,0,83,84,5,14,0,0,84,86,3,18,9,0,85,83,1,0,0,0,86,89,1,0,
-  	0,0,87,85,1,0,0,0,87,88,1,0,0,0,88,9,1,0,0,0,89,87,1,0,0,0,90,92,3,12,
-  	6,0,91,90,1,0,0,0,91,92,1,0,0,0,92,94,1,0,0,0,93,95,3,14,7,0,94,93,1,
-  	0,0,0,94,95,1,0,0,0,95,97,1,0,0,0,96,98,3,16,8,0,97,96,1,0,0,0,97,98,
-  	1,0,0,0,98,11,1,0,0,0,99,100,3,24,12,0,100,101,5,9,0,0,101,13,1,0,0,0,
-  	102,103,3,24,12,0,103,104,5,10,0,0,104,15,1,0,0,0,105,106,3,24,12,0,106,
-  	107,5,11,0,0,107,17,1,0,0,0,108,109,3,20,10,0,109,19,1,0,0,0,110,111,
-  	5,18,0,0,111,21,1,0,0,0,112,115,3,24,12,0,113,115,3,26,13,0,114,112,1,
-  	0,0,0,114,113,1,0,0,0,115,23,1,0,0,0,116,117,5,16,0,0,117,25,1,0,0,0,
-  	118,119,5,15,0,0,119,27,1,0,0,0,9,30,32,46,80,87,91,94,97,114
+  	3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,
+  	1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,111,8,3,1,
+  	4,1,4,1,4,5,4,116,8,4,10,4,12,4,119,9,4,1,5,3,5,122,8,5,1,5,3,5,125,8,
+  	5,1,5,3,5,128,8,5,1,6,1,6,1,6,1,7,1,7,1,7,1,8,1,8,1,8,1,9,1,9,1,10,1,
+  	10,1,11,1,11,3,11,145,8,11,1,12,1,12,1,13,1,13,1,13,0,0,14,0,2,4,6,8,
+  	10,12,14,16,18,20,22,24,26,0,0,153,0,32,1,0,0,0,2,37,1,0,0,0,4,40,1,0,
+  	0,0,6,110,1,0,0,0,8,112,1,0,0,0,10,121,1,0,0,0,12,129,1,0,0,0,14,132,
+  	1,0,0,0,16,135,1,0,0,0,18,138,1,0,0,0,20,140,1,0,0,0,22,144,1,0,0,0,24,
+  	146,1,0,0,0,26,148,1,0,0,0,28,31,3,4,2,0,29,31,3,2,1,0,30,28,1,0,0,0,
+  	30,29,1,0,0,0,31,34,1,0,0,0,32,30,1,0,0,0,32,33,1,0,0,0,33,35,1,0,0,0,
+  	34,32,1,0,0,0,35,36,5,0,0,1,36,1,1,0,0,0,37,38,5,24,0,0,38,39,6,1,-1,
+  	0,39,3,1,0,0,0,40,41,5,2,0,0,41,42,5,3,0,0,42,46,5,17,0,0,43,45,3,6,3,
+  	0,44,43,1,0,0,0,45,48,1,0,0,0,46,44,1,0,0,0,46,47,1,0,0,0,47,49,1,0,0,
+  	0,48,46,1,0,0,0,49,50,5,18,0,0,50,5,1,0,0,0,51,52,5,4,0,0,52,53,3,10,
+  	5,0,53,54,5,17,0,0,54,55,3,8,4,0,55,56,5,18,0,0,56,111,1,0,0,0,57,58,
+  	5,12,0,0,58,59,3,10,5,0,59,60,5,17,0,0,60,61,3,8,4,0,61,62,5,18,0,0,62,
+  	111,1,0,0,0,63,64,5,13,0,0,64,65,5,17,0,0,65,66,3,8,4,0,66,67,5,18,0,
+  	0,67,111,1,0,0,0,68,69,5,5,0,0,69,70,3,10,5,0,70,71,5,17,0,0,71,72,3,
+  	8,4,0,72,73,5,18,0,0,73,111,1,0,0,0,74,75,5,6,0,0,75,76,3,10,5,0,76,77,
+  	5,17,0,0,77,78,3,8,4,0,78,79,5,18,0,0,79,111,1,0,0,0,80,81,5,7,0,0,81,
+  	82,3,10,5,0,82,83,5,17,0,0,83,84,3,8,4,0,84,85,5,18,0,0,85,111,1,0,0,
+  	0,86,87,5,8,0,0,87,88,3,10,5,0,88,89,5,17,0,0,89,90,3,8,4,0,90,91,5,18,
+  	0,0,91,111,1,0,0,0,92,93,5,9,0,0,93,94,3,10,5,0,94,95,5,17,0,0,95,96,
+  	3,8,4,0,96,97,5,18,0,0,97,111,1,0,0,0,98,99,5,10,0,0,99,100,3,10,5,0,
+  	100,101,5,17,0,0,101,102,3,8,4,0,102,103,5,18,0,0,103,111,1,0,0,0,104,
+  	105,5,11,0,0,105,106,3,10,5,0,106,107,5,17,0,0,107,108,3,8,4,0,108,109,
+  	5,18,0,0,109,111,1,0,0,0,110,51,1,0,0,0,110,57,1,0,0,0,110,63,1,0,0,0,
+  	110,68,1,0,0,0,110,74,1,0,0,0,110,80,1,0,0,0,110,86,1,0,0,0,110,92,1,
+  	0,0,0,110,98,1,0,0,0,110,104,1,0,0,0,111,7,1,0,0,0,112,117,3,18,9,0,113,
+  	114,5,19,0,0,114,116,3,18,9,0,115,113,1,0,0,0,116,119,1,0,0,0,117,115,
+  	1,0,0,0,117,118,1,0,0,0,118,9,1,0,0,0,119,117,1,0,0,0,120,122,3,12,6,
+  	0,121,120,1,0,0,0,121,122,1,0,0,0,122,124,1,0,0,0,123,125,3,14,7,0,124,
+  	123,1,0,0,0,124,125,1,0,0,0,125,127,1,0,0,0,126,128,3,16,8,0,127,126,
+  	1,0,0,0,127,128,1,0,0,0,128,11,1,0,0,0,129,130,3,24,12,0,130,131,5,14,
+  	0,0,131,13,1,0,0,0,132,133,3,24,12,0,133,134,5,15,0,0,134,15,1,0,0,0,
+  	135,136,3,24,12,0,136,137,5,16,0,0,137,17,1,0,0,0,138,139,3,20,10,0,139,
+  	19,1,0,0,0,140,141,5,23,0,0,141,21,1,0,0,0,142,145,3,24,12,0,143,145,
+  	3,26,13,0,144,142,1,0,0,0,144,143,1,0,0,0,145,23,1,0,0,0,146,147,5,21,
+  	0,0,147,25,1,0,0,0,148,149,5,20,0,0,149,27,1,0,0,0,9,30,32,46,110,117,
+  	121,124,127,144
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -354,7 +367,7 @@ OptionDeclarationParser::Option_declarationContext* OptionDeclarationParser::opt
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 496) != 0)) {
+      ((1ULL << _la) & 16368) != 0)) {
       setState(43);
       quarantine_policy();
       setState(48);
@@ -447,6 +460,68 @@ std::any OptionDeclarationParser::Direct_policyContext::accept(tree::ParseTreeVi
   else
     return visitor->visitChildren(this);
 }
+//----------------- Max_ema_dynamic_time_policyContext ------------------------------------------------------------------
+
+tree::TerminalNode* OptionDeclarationParser::Max_ema_dynamic_time_policyContext::K_MAX_EMA_DYNAMIC_TIME() {
+  return getToken(OptionDeclarationParser::K_MAX_EMA_DYNAMIC_TIME, 0);
+}
+
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Max_ema_dynamic_time_policyContext::time_span() {
+  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Max_ema_dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Max_ema_dynamic_time_policyContext::stream_names() {
+  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Max_ema_dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Max_ema_dynamic_time_policyContext::Max_ema_dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+
+
+std::any OptionDeclarationParser::Max_ema_dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
+    return parserVisitor->visitMax_ema_dynamic_time_policy(this);
+  else
+    return visitor->visitChildren(this);
+}
+//----------------- Per_event_dynamic_time_policyContext ------------------------------------------------------------------
+
+tree::TerminalNode* OptionDeclarationParser::Per_event_dynamic_time_policyContext::K_PER_EVENT_DYNAMIC_TIME() {
+  return getToken(OptionDeclarationParser::K_PER_EVENT_DYNAMIC_TIME, 0);
+}
+
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Per_event_dynamic_time_policyContext::time_span() {
+  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Per_event_dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Per_event_dynamic_time_policyContext::stream_names() {
+  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Per_event_dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Per_event_dynamic_time_policyContext::Per_event_dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+
+
+std::any OptionDeclarationParser::Per_event_dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
+    return parserVisitor->visitPer_event_dynamic_time_policy(this);
+  else
+    return visitor->visitChildren(this);
+}
 //----------------- New_fixed_time_policyContext ------------------------------------------------------------------
 
 tree::TerminalNode* OptionDeclarationParser::New_fixed_time_policyContext::K_NEW_FIXED_TIME() {
@@ -509,34 +584,127 @@ std::any OptionDeclarationParser::Fixed_time_policyContext::accept(tree::ParseTr
   else
     return visitor->visitChildren(this);
 }
-//----------------- Dynamic_time_policyContext ------------------------------------------------------------------
+//----------------- Avg_dynamic_time_policyContext ------------------------------------------------------------------
 
-tree::TerminalNode* OptionDeclarationParser::Dynamic_time_policyContext::K_DYNAMIC_TIME() {
-  return getToken(OptionDeclarationParser::K_DYNAMIC_TIME, 0);
+tree::TerminalNode* OptionDeclarationParser::Avg_dynamic_time_policyContext::K_AVG_DYNAMIC_TIME() {
+  return getToken(OptionDeclarationParser::K_AVG_DYNAMIC_TIME, 0);
 }
 
-OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Dynamic_time_policyContext::time_span() {
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Avg_dynamic_time_policyContext::time_span() {
   return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
 }
 
-tree::TerminalNode* OptionDeclarationParser::Dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
+tree::TerminalNode* OptionDeclarationParser::Avg_dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
   return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
 }
 
-OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Dynamic_time_policyContext::stream_names() {
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Avg_dynamic_time_policyContext::stream_names() {
   return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
 }
 
-tree::TerminalNode* OptionDeclarationParser::Dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
+tree::TerminalNode* OptionDeclarationParser::Avg_dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
   return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
 }
 
-OptionDeclarationParser::Dynamic_time_policyContext::Dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+OptionDeclarationParser::Avg_dynamic_time_policyContext::Avg_dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
 
 
-std::any OptionDeclarationParser::Dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any OptionDeclarationParser::Avg_dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
-    return parserVisitor->visitDynamic_time_policy(this);
+    return parserVisitor->visitAvg_dynamic_time_policy(this);
+  else
+    return visitor->visitChildren(this);
+}
+//----------------- Jad_dynamic_time_policyContext ------------------------------------------------------------------
+
+tree::TerminalNode* OptionDeclarationParser::Jad_dynamic_time_policyContext::K_JAD_DYNAMIC_TIME() {
+  return getToken(OptionDeclarationParser::K_JAD_DYNAMIC_TIME, 0);
+}
+
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Jad_dynamic_time_policyContext::time_span() {
+  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Jad_dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Jad_dynamic_time_policyContext::stream_names() {
+  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Jad_dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Jad_dynamic_time_policyContext::Jad_dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+
+
+std::any OptionDeclarationParser::Jad_dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
+    return parserVisitor->visitJad_dynamic_time_policy(this);
+  else
+    return visitor->visitChildren(this);
+}
+//----------------- Max_dynamic_time_policyContext ------------------------------------------------------------------
+
+tree::TerminalNode* OptionDeclarationParser::Max_dynamic_time_policyContext::K_MAX_DYNAMIC_TIME() {
+  return getToken(OptionDeclarationParser::K_MAX_DYNAMIC_TIME, 0);
+}
+
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::Max_dynamic_time_policyContext::time_span() {
+  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Max_dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::Max_dynamic_time_policyContext::stream_names() {
+  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::Max_dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Max_dynamic_time_policyContext::Max_dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+
+
+std::any OptionDeclarationParser::Max_dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
+    return parserVisitor->visitMax_dynamic_time_policy(this);
+  else
+    return visitor->visitChildren(this);
+}
+//----------------- P99_dynamic_time_policyContext ------------------------------------------------------------------
+
+tree::TerminalNode* OptionDeclarationParser::P99_dynamic_time_policyContext::K_P99_DYNAMIC_TIME() {
+  return getToken(OptionDeclarationParser::K_P99_DYNAMIC_TIME, 0);
+}
+
+OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::P99_dynamic_time_policyContext::time_span() {
+  return getRuleContext<OptionDeclarationParser::Time_spanContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::P99_dynamic_time_policyContext::LEFT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::LEFT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::P99_dynamic_time_policyContext::stream_names() {
+  return getRuleContext<OptionDeclarationParser::Stream_namesContext>(0);
+}
+
+tree::TerminalNode* OptionDeclarationParser::P99_dynamic_time_policyContext::RIGHT_CURLY_BRACKET() {
+  return getToken(OptionDeclarationParser::RIGHT_CURLY_BRACKET, 0);
+}
+
+OptionDeclarationParser::P99_dynamic_time_policyContext::P99_dynamic_time_policyContext(Quarantine_policyContext *ctx) { copyFrom(ctx); }
+
+
+std::any OptionDeclarationParser::P99_dynamic_time_policyContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<OptionDeclarationParserVisitor*>(visitor))
+    return parserVisitor->visitP99_dynamic_time_policy(this);
   else
     return visitor->visitChildren(this);
 }
@@ -552,7 +720,7 @@ OptionDeclarationParser::Quarantine_policyContext* OptionDeclarationParser::quar
     exitRule();
   });
   try {
-    setState(80);
+    setState(110);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case OptionDeclarationParser::K_FIXED_TIME: {
@@ -617,11 +785,11 @@ OptionDeclarationParser::Quarantine_policyContext* OptionDeclarationParser::quar
         break;
       }
 
-      case OptionDeclarationParser::K_DYNAMIC_TIME: {
-        _localctx = _tracker.createInstance<OptionDeclarationParser::Dynamic_time_policyContext>(_localctx);
+      case OptionDeclarationParser::K_AVG_DYNAMIC_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::Avg_dynamic_time_policyContext>(_localctx);
         enterOuterAlt(_localctx, 5);
         setState(74);
-        match(OptionDeclarationParser::K_DYNAMIC_TIME);
+        match(OptionDeclarationParser::K_AVG_DYNAMIC_TIME);
         setState(75);
         time_span();
         setState(76);
@@ -629,6 +797,86 @@ OptionDeclarationParser::Quarantine_policyContext* OptionDeclarationParser::quar
         setState(77);
         stream_names();
         setState(78);
+        match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
+        break;
+      }
+
+      case OptionDeclarationParser::K_JAD_DYNAMIC_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::Jad_dynamic_time_policyContext>(_localctx);
+        enterOuterAlt(_localctx, 6);
+        setState(80);
+        match(OptionDeclarationParser::K_JAD_DYNAMIC_TIME);
+        setState(81);
+        time_span();
+        setState(82);
+        match(OptionDeclarationParser::LEFT_CURLY_BRACKET);
+        setState(83);
+        stream_names();
+        setState(84);
+        match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
+        break;
+      }
+
+      case OptionDeclarationParser::K_MAX_DYNAMIC_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::Max_dynamic_time_policyContext>(_localctx);
+        enterOuterAlt(_localctx, 7);
+        setState(86);
+        match(OptionDeclarationParser::K_MAX_DYNAMIC_TIME);
+        setState(87);
+        time_span();
+        setState(88);
+        match(OptionDeclarationParser::LEFT_CURLY_BRACKET);
+        setState(89);
+        stream_names();
+        setState(90);
+        match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
+        break;
+      }
+
+      case OptionDeclarationParser::K_MAX_EMA_DYNAMIC_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::Max_ema_dynamic_time_policyContext>(_localctx);
+        enterOuterAlt(_localctx, 8);
+        setState(92);
+        match(OptionDeclarationParser::K_MAX_EMA_DYNAMIC_TIME);
+        setState(93);
+        time_span();
+        setState(94);
+        match(OptionDeclarationParser::LEFT_CURLY_BRACKET);
+        setState(95);
+        stream_names();
+        setState(96);
+        match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
+        break;
+      }
+
+      case OptionDeclarationParser::K_P99_DYNAMIC_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::P99_dynamic_time_policyContext>(_localctx);
+        enterOuterAlt(_localctx, 9);
+        setState(98);
+        match(OptionDeclarationParser::K_P99_DYNAMIC_TIME);
+        setState(99);
+        time_span();
+        setState(100);
+        match(OptionDeclarationParser::LEFT_CURLY_BRACKET);
+        setState(101);
+        stream_names();
+        setState(102);
+        match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
+        break;
+      }
+
+      case OptionDeclarationParser::K_PER_EVENT_DYNAMIC_TIME: {
+        _localctx = _tracker.createInstance<OptionDeclarationParser::Per_event_dynamic_time_policyContext>(_localctx);
+        enterOuterAlt(_localctx, 10);
+        setState(104);
+        match(OptionDeclarationParser::K_PER_EVENT_DYNAMIC_TIME);
+        setState(105);
+        time_span();
+        setState(106);
+        match(OptionDeclarationParser::LEFT_CURLY_BRACKET);
+        setState(107);
+        stream_names();
+        setState(108);
         match(OptionDeclarationParser::RIGHT_CURLY_BRACKET);
         break;
       }
@@ -696,17 +944,17 @@ OptionDeclarationParser::Stream_namesContext* OptionDeclarationParser::stream_na
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(82);
+    setState(112);
     stream_name();
-    setState(87);
+    setState(117);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == OptionDeclarationParser::COMMA) {
-      setState(83);
+      setState(113);
       match(OptionDeclarationParser::COMMA);
-      setState(84);
+      setState(114);
       stream_name();
-      setState(89);
+      setState(119);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -766,12 +1014,12 @@ OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::time_span() 
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(91);
+    setState(121);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 5, _ctx)) {
     case 1: {
-      setState(90);
+      setState(120);
       hour_span();
       break;
     }
@@ -779,12 +1027,12 @@ OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::time_span() 
     default:
       break;
     }
-    setState(94);
+    setState(124);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx)) {
     case 1: {
-      setState(93);
+      setState(123);
       minute_span();
       break;
     }
@@ -792,12 +1040,12 @@ OptionDeclarationParser::Time_spanContext* OptionDeclarationParser::time_span() 
     default:
       break;
     }
-    setState(97);
+    setState(127);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == OptionDeclarationParser::INTEGER_LITERAL) {
-      setState(96);
+      setState(126);
       second_span();
     }
    
@@ -851,9 +1099,9 @@ OptionDeclarationParser::Hour_spanContext* OptionDeclarationParser::hour_span() 
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(99);
+    setState(129);
     integer();
-    setState(100);
+    setState(130);
     match(OptionDeclarationParser::K_HOURS);
    
   }
@@ -906,9 +1154,9 @@ OptionDeclarationParser::Minute_spanContext* OptionDeclarationParser::minute_spa
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(102);
+    setState(132);
     integer();
-    setState(103);
+    setState(133);
     match(OptionDeclarationParser::K_MINUTES);
    
   }
@@ -961,9 +1209,9 @@ OptionDeclarationParser::Second_spanContext* OptionDeclarationParser::second_spa
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(105);
+    setState(135);
     integer();
-    setState(106);
+    setState(136);
     match(OptionDeclarationParser::K_SECONDS);
    
   }
@@ -1012,7 +1260,7 @@ OptionDeclarationParser::Stream_nameContext* OptionDeclarationParser::stream_nam
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(108);
+    setState(138);
     any_name();
    
   }
@@ -1061,7 +1309,7 @@ OptionDeclarationParser::Any_nameContext* OptionDeclarationParser::any_name() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(110);
+    setState(140);
     match(OptionDeclarationParser::IDENTIFIER);
    
   }
@@ -1113,19 +1361,19 @@ OptionDeclarationParser::NumberContext* OptionDeclarationParser::number() {
     exitRule();
   });
   try {
-    setState(114);
+    setState(144);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case OptionDeclarationParser::INTEGER_LITERAL: {
         enterOuterAlt(_localctx, 1);
-        setState(112);
+        setState(142);
         integer();
         break;
       }
 
       case OptionDeclarationParser::DOUBLE_LITERAL: {
         enterOuterAlt(_localctx, 2);
-        setState(113);
+        setState(143);
         double_();
         break;
       }
@@ -1180,7 +1428,7 @@ OptionDeclarationParser::IntegerContext* OptionDeclarationParser::integer() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(116);
+    setState(146);
     match(OptionDeclarationParser::INTEGER_LITERAL);
    
   }
@@ -1229,7 +1477,7 @@ OptionDeclarationParser::DoubleContext* OptionDeclarationParser::double_() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(118);
+    setState(148);
     match(OptionDeclarationParser::DOUBLE_LITERAL);
    
   }

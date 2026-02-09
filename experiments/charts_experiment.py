@@ -27,6 +27,16 @@ OPTIONS_PATH = os.path.join(PROJECT_ROOT, OPTIONS)
 CMD_WITHOUT_QUARANTINE = [f"/CORE/build/{DIR}/offline", "--query", f"/workspace/{QUERY}", "--declaration", f"/workspace/{DECL}", "--csv", f"/workspace/{CSV_ORDERED}"]
 CMD_WITH_QUARANTINE = [f"/CORE/build/{DIR}/offline", "--query", f"/workspace/{QUERY}", "--declaration", f"/workspace/{DECL}", "--csv", f"/workspace/{CSV}", "--options", f"/workspace/{OPTIONS}"]
 
+POLICY_LABELS = {
+    "NEW_FIXED_TIME": "NEW_FIXED_TIME",
+    "AVG_DYNAMIC_TIME": "AVG_DYNAMIC_TIME",
+    "JAD_DYNAMIC_TIME": "JAD_DYNAMIC_TIME",
+    "MAX_DYNAMIC_TIME": "MAX_DYNAMIC_TIME",
+    "MAX_EMA_DYNAMIC_TIME": "MAX_EMA_DYNAMIC_TIME",
+    "P99_DYNAMIC_TIME": "P99_DYNAMIC_TIME",
+    "PER_EVENT_DYNAMIC_TIME": "PER_EVENT_DYNAMIC_TIME",
+}
+
 def count_events(csv_path):
     with open(csv_path) as f:
         return sum(1 for _ in f) - 1
@@ -56,6 +66,14 @@ def extract_events(output):
                     
     return received_order, sent_order, complex_events
 
+
+def get_policy_from_options(options_contents):
+    policy_keys = "|".join(POLICY_LABELS.keys())
+    match = re.search(rf'({policy_keys})\s+(\d+)\s+seconds', options_contents)
+    if not match:
+        raise ValueError("No supported policy found in options file.")
+    return match.group(1), int(match.group(2))
+
 def run_test(description, cmd, query_contents, options_contents=None):
     drops = 0
     received = 0
@@ -63,7 +81,11 @@ def run_test(description, cmd, query_contents, options_contents=None):
     avg_detection_delay = 0.0
     max_quarantine_size = 0
     max_quarantine_size_mb = 0.0
-    max_quarantine_size_mb = 0.0
+    std_deviation = 0.0
+    median_detection_delay = 0.0
+    min_detection_delay = 0.0
+    max_detection_delay = 0.0
+    m95th_percentile_detection_delay = 0.0
 
     t0 = time.perf_counter()
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -121,6 +143,26 @@ def run_test(description, cmd, query_contents, options_contents=None):
                     match = re.search(r"([\d.]+)", line) 
                     if match:
                         max_quarantine_size_mb = float(match.group(1))
+                elif line.startswith("Standard deviation: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        std_deviation= float(match.group(1))
+                elif line.startswith("Median detection delay: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        median_detection_delay = float(match.group(1))
+                elif line.startswith("Min detection delay: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        min_detection_delay = float(match.group(1))
+                elif line.startswith("Max detection delay: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        max_detection_delay = float(match.group(1))
+                elif line.startswith("95th percentile detection delay: "):
+                    match = re.search(r"([\d.]+)", line) 
+                    if match:
+                        m95th_percentile_detection_delay = float(match.group(1))
                 quarantine_file.write(f"{line}\n")
     
     if options_contents is None:
@@ -129,7 +171,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
     
     received_order, sent_order, complex_events = extract_events(result.stdout)
 
-    return received_order, sent_order, complex_events, elapsed_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb
+    return received_order, sent_order, complex_events, elapsed_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb, std_deviation, median_detection_delay, min_detection_delay, max_detection_delay, m95th_percentile_detection_delay
 
 if __name__ == "__main__":
     if subprocess.call(["docker", "image", "inspect", IMG_LOCAL], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL):
@@ -148,11 +190,8 @@ if __name__ == "__main__":
 
     print("\nQuery:\n  " + query_contents)
 
-    match = re.search(r'DYNAMIC_TIME\s+(\d+)\s+seconds', options_contents)
-    number = None
+    policy_key, number = get_policy_from_options(options_contents)
     quarantine_times = []
-    if match:
-        number = int(match.group(1))
     
     x = number
     while x >= 1:
@@ -169,7 +208,8 @@ if __name__ == "__main__":
         x *= 2'''
 
     quarantine_times = sorted(quarantine_times)
-    print(f"\nQuarantine times to test: {quarantine_times}\n")
+    print(f"\nPolicy: {policy_key}")
+    print(f"Quarantine times to test: {quarantine_times}\n")
 
     execution_time = []
     throughput = []
@@ -178,6 +218,11 @@ if __name__ == "__main__":
     avgDetectionDelays = []
     maxQuarantineSizes = []
     maxQuarantineSizesMB = []
+    stdDeviations = []
+    medianDetectionDelays = []
+    minDetectionDelays = []
+    maxDetectionDelays = []
+    m95thPercentileDetectionDelays = []
     
     results_labels = ["Execution Time (s)", "Throughput (results/s)", "Number of Results", "Number of Drops", "Average Detection Delay (s)"]
 
@@ -185,15 +230,15 @@ if __name__ == "__main__":
     num_results_direct, direct_core_time, direct_drops, direct_avg_detection_delay = run_test("DIRECT Policy (No Quarantine)", cmd_direct, query_contents)
 
     for i in quarantine_times:
-        options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
-                    f'DYNAMIC_TIME {i} seconds',
+        options_contents = re.sub(rf'{policy_key}\s+\d+\s+seconds',
+                f'{policy_key} {i} seconds',
                     options_contents)
 
         with open(OPTIONS_PATH, "w") as f:
             f.write(options_contents)
 
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
-        received_wait, sent_wait, events_wait, core_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait, events_wait, core_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb, std_deviation, median_detection_delay, min_detection_delay, max_detection_delay, m95th_percentile_detection_delay = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         execution_time.append(round(core_time,2))
         throughput.append(round((num_results_direct / core_time),2))
         numOfResults.append(len(events_wait))
@@ -201,6 +246,11 @@ if __name__ == "__main__":
         avgDetectionDelays.append(round(avg_detection_delay,5))
         maxQuarantineSizes.append(max_quarantine_size)
         maxQuarantineSizesMB.append(max_quarantine_size_mb)
+        stdDeviations.append(round(std_deviation,5))
+        medianDetectionDelays.append(round(median_detection_delay,5))
+        minDetectionDelays.append(round(min_detection_delay,5))
+        maxDetectionDelays.append(round(max_detection_delay,5))
+        m95thPercentileDetectionDelays.append(round(m95th_percentile_detection_delay,5))
     
     print("== Quarantine Time ==", end="")
     for i in range(len(results_labels)):
@@ -234,7 +284,7 @@ if __name__ == "__main__":
     x_pos = range(len(quarantine_times))
     
     # Plot with evenly spaced x-positions
-    plt.plot(x_pos, execution_time, 'o-', color='tab:orange', label='WAIT Policy')
+    plt.plot(x_pos, execution_time, 'o-', color='tab:orange', label=f'{policy_key} Policy')
     
     # Add value labels on top of each point
     y_min, y_max = min(execution_time), max(execution_time)
@@ -247,8 +297,8 @@ if __name__ == "__main__":
     
     # Set x-ticks to show the actual quarantine times
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title(f'Execution Time vs Quarantine Fixed Time\n(DIRECT: {direct_core_time:.2f}s)', pad=10)
-    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.title(f'Execution Time vs Quarantine Time\n(DIRECT: {direct_core_time:.2f}s)', pad=10)
+    plt.xlabel('Quarantine Time (s)')
     plt.ylabel('Execution Time (s)')
     plt.legend()
     plt.grid(True)
@@ -261,7 +311,7 @@ if __name__ == "__main__":
     
     # Plot with evenly spaced x-positions
     x_pos = range(len(quarantine_times))
-    plt.plot(x_pos, throughput, 'o-', color='tab:blue', label='WAIT Policy')
+    plt.plot(x_pos, throughput, 'o-', color='tab:blue', label=f'{policy_key} Policy')
     
     # Add value labels on top of each point
     y_min, y_max = min(throughput), max(throughput)
@@ -274,8 +324,8 @@ if __name__ == "__main__":
     
     # Set x-ticks to show the actual quarantine times
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title(f'Query Throughput vs Quarantine Fixed Time\n(DIRECT: {num_results_direct/direct_core_time:.2f} results/s)', pad=10)
-    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.title(f'Query Throughput vs Quarantine Time\n(DIRECT: {num_results_direct/direct_core_time:.2f} results/s)', pad=10)
+    plt.xlabel('Quarantine Time (s)')
     plt.ylabel('Throughput (results/sec)')
     plt.legend()
     plt.grid(True)
@@ -288,7 +338,7 @@ if __name__ == "__main__":
     
     # Plot with evenly spaced x-positions
     x_pos = range(len(quarantine_times))
-    plt.plot(x_pos, numOfResults, 'o-', color='tab:green', label='DYNAMIC Policy')
+    plt.plot(x_pos, numOfResults, 'o-', color='tab:green', label=f'{policy_key} Policy')
     
     # Add value labels on top of each point
     y_min, y_max = min(numOfResults), max(numOfResults)
@@ -301,8 +351,8 @@ if __name__ == "__main__":
     
     # Set x-ticks to show the actual quarantine times
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title(f'Complex Events Found vs Quarantine Fixed Time\n(DIRECT: {num_results_direct} results)', pad=10)
-    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.title(f'Complex Events Found vs Quarantine Time\n(DIRECT: {num_results_direct} results)', pad=10)
+    plt.xlabel('Quarantine Time (s)')
     plt.ylabel('Number of Results')
     plt.legend()
     plt.grid(True)
@@ -328,8 +378,8 @@ if __name__ == "__main__":
     
     # Set x-ticks to show the actual quarantine times
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title(f'Dropped Events vs Quarantine Fixed Time\n(DIRECT: {direct_drops} drops)', pad=10)
-    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.title(f'Dropped Events vs Quarantine Time\n(DIRECT: {direct_drops} drops)', pad=10)
+    plt.xlabel('Quarantine Time (s)')
     plt.ylabel('Number of Dropped Events')
     plt.legend()
     plt.grid(True)
@@ -341,7 +391,7 @@ if __name__ == "__main__":
     plt.figure(figsize=(15,8))
     # Plot with evenly spaced x-positions
     x_pos = range(len(quarantine_times))
-    plt.plot(x_pos, avgDetectionDelays, 'o-', color='tab:pink', label='DYNAMIC Policy')
+    plt.plot(x_pos, avgDetectionDelays, 'o-', color='tab:pink', label=f'{policy_key} Policy')
     # Add value labels on top of each point
     y_min, y_max = min(avgDetectionDelays), max(avgDetectionDelays)
     y_range = y_max - y_min if y_max > y_min else 1
@@ -351,8 +401,8 @@ if __name__ == "__main__":
                 ha='center', fontsize=9, va='bottom')
     # Set x-ticks to show the actual quarantine times
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title(f'Average Detection Delay vs Quarantine Fixed Time\n', pad=10)
-    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.title(f'Average Detection Delay vs Quarantine Time\n', pad=10)
+    plt.xlabel('Quarantine Time (s)')
     plt.ylabel('Average Detection Delay (s)')
     plt.legend()
     plt.grid(True)
@@ -378,8 +428,8 @@ if __name__ == "__main__":
     
     # Set x-ticks to show the actual quarantine times
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title(f'Maximum Quarantine Size vs Quarantine Fixed Time', pad=10)
-    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.title(f'Maximum Quarantine Size vs Quarantine Time', pad=10)
+    plt.xlabel('Quarantine Time (s)')
     plt.ylabel('Maximum Quarantine Size (events)')
     plt.legend()
     plt.grid(True)
@@ -405,18 +455,113 @@ if __name__ == "__main__":
 
     # Set x-ticks to show the actual quarantine times
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
-    plt.title('Maximum Quarantine Size (MB) vs Quarantine Fixed Time', pad=10)
-    plt.xlabel('Quarantine Fixed Time (s)')
+    plt.title('Maximum Quarantine Size (MB) vs Quarantine Time', pad=10)
+    plt.xlabel('Quarantine Time (s)')
     plt.ylabel('Maximum Quarantine Size (MB)')
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
     plt.savefig("Maximum Quarantine Size (MB).png", dpi=300, bbox_inches='tight')
     #plt.show() 
+
+    # ======= Standard Deviation =======
+    plt.figure(figsize=(15,8))
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, stdDeviations, 'o-', color='tab:olive', label=f'{policy_key} Policy')
+    y_min, y_max = min(stdDeviations), max(stdDeviations)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02
+    for x, y in zip(x_pos, stdDeviations):
+        plt.text(x, y + offset, f"{y:.5f}", ha='center', fontsize=9, va='bottom')
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title('Standard Deviation vs Quarantine Time', pad=10)
+    plt.xlabel('Quarantine Time (s)')
+    plt.ylabel('Standard Deviation (s)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("Standard Deviation.png", dpi=300, bbox_inches='tight')
+    #plt.show()
+
+    # ======= Median Detection Delay =======
+    plt.figure(figsize=(15,8))
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, medianDetectionDelays, 'o-', color='tab:cyan', label=f'{policy_key} Policy')
+    y_min, y_max = min(medianDetectionDelays), max(medianDetectionDelays)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02
+    for x, y in zip(x_pos, medianDetectionDelays):
+        plt.text(x, y + offset, f"{y:.5f}", ha='center', fontsize=9, va='bottom')
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title('Median Detection Delay vs Quarantine Time', pad=10)
+    plt.xlabel('Quarantine Time (s)')
+    plt.ylabel('Median Detection Delay (s)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("Median Detection Delay.png", dpi=300, bbox_inches='tight')
+    #plt.show()
+
+    # ======= Min Detection Delay =======
+    plt.figure(figsize=(15,8))
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, minDetectionDelays, 'o-', color='tab:gray', label=f'{policy_key} Policy')
+    y_min, y_max = min(minDetectionDelays), max(minDetectionDelays)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02
+    for x, y in zip(x_pos, minDetectionDelays):
+        plt.text(x, y + offset, f"{y:.5f}", ha='center', fontsize=9, va='bottom')
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title('Min Detection Delay vs Quarantine Time', pad=10)
+    plt.xlabel('Quarantine Time (s)')
+    plt.ylabel('Min Detection Delay (s)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("Min Detection Delay.png", dpi=300, bbox_inches='tight')
+    #plt.show()
+
+    # ======= Max Detection Delay =======
+    plt.figure(figsize=(15,8))
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, maxDetectionDelays, 'o-', color='tab:purple', label=f'{policy_key} Policy')
+    y_min, y_max = min(maxDetectionDelays), max(maxDetectionDelays)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02
+    for x, y in zip(x_pos, maxDetectionDelays):
+        plt.text(x, y + offset, f"{y:.5f}", ha='center', fontsize=9, va='bottom')
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title('Max Detection Delay vs Quarantine Time', pad=10)
+    plt.xlabel('Quarantine Time (s)')
+    plt.ylabel('Max Detection Delay (s)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("Max Detection Delay.png", dpi=300, bbox_inches='tight')
+    #plt.show()
+
+    # ======= 95th Percentile Detection Delay =======
+    plt.figure(figsize=(15,8))
+    x_pos = range(len(quarantine_times))
+    plt.plot(x_pos, m95thPercentileDetectionDelays, 'o-', color='tab:orange', label=f'{policy_key} Policy')
+    y_min, y_max = min(m95thPercentileDetectionDelays), max(m95thPercentileDetectionDelays)
+    y_range = y_max - y_min if y_max > y_min else 1
+    offset = y_range * 0.02
+    for x, y in zip(x_pos, m95thPercentileDetectionDelays):
+        plt.text(x, y + offset, f"{y:.5f}", ha='center', fontsize=9, va='bottom')
+    plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
+    plt.title('95th Percentile Detection Delay vs Quarantine Time', pad=10)
+    plt.xlabel('Quarantine Time (s)')
+    plt.ylabel('95th Percentile Detection Delay (s)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("95th Percentile Detection Delay.png", dpi=300, bbox_inches='tight')
+    #plt.show() 
     
 
-    options_contents = re.sub(r'DYNAMIC_TIME\s+\d+\s+seconds',
-                    f'DYNAMIC_TIME {number} seconds',
+    options_contents = re.sub(rf'{policy_key}\s+\d+\s+seconds',
+                    f'{policy_key} {number} seconds',
                     options_contents)
     
     with open(OPTIONS_PATH, "w") as f:
@@ -434,6 +579,11 @@ if __name__ == "__main__":
     print(f"Average Detection Delays (s): {tuple(avgDetectionDelays)}")
     print(f"Maximum Quarantine Sizes: {tuple(maxQuarantineSizes)}")
     print(f"Maximum Quarantine Sizes (MB): {tuple(maxQuarantineSizesMB)}")
+    print(f"Standard Deviations (s): {tuple(stdDeviations)}")
+    print(f"Median Detection Delays (s): {tuple(medianDetectionDelays)}")
+    print(f"Min Detection Delays (s): {tuple(minDetectionDelays)}")
+    print(f"Max Detection Delays (s): {tuple(maxDetectionDelays)}")
+    print(f"95th Percentile Detection Delays (s): {tuple(m95thPercentileDetectionDelays)}")
     print("="*70)
         
         

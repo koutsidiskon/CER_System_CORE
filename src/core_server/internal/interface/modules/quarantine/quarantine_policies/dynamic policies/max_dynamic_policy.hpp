@@ -16,7 +16,7 @@
 #include <utility>
 #include <algorithm>
 
-#include "base_policy.hpp"
+#include "../base_policy.hpp"
 #include "core_server/internal/coordination/catalog.hpp"
 #include "quill/LogMacros.h"
 #include "shared/datatypes/aliases/port_number.hpp"
@@ -25,7 +25,7 @@
 
 namespace CORE::Internal::Interface::Module::Quarantine {
 
-class DynamicTimePolicy: public BasePolicy {
+class MaxDynamicPolicy: public BasePolicy {
   std::mutex events_lock;
     std::set<Types::EventWrapper> events;
     std::chrono::duration<int64_t, std::nano> time_to_wait;
@@ -49,7 +49,7 @@ class DynamicTimePolicy: public BasePolicy {
     Types::IntValue last_time_sent = Types::IntValue::create_lower_bound();
 
  public:
-  DynamicTimePolicy(Catalog& catalog,
+  MaxDynamicPolicy(Catalog& catalog,
                  std::atomic<Types::PortNumber>& next_available_inproc_port,
                  std::chrono::duration<int64_t, std::nano> time_to_wait,
                  double safety_margin = 1.5,
@@ -69,7 +69,7 @@ class DynamicTimePolicy: public BasePolicy {
       }
   }
 
-  ~DynamicTimePolicy() { this->handle_destruction(); }
+  ~MaxDynamicPolicy() { this->handle_destruction(); }
 
   void save_events_to_disk() {
     if (events.empty()) {
@@ -127,10 +127,9 @@ class DynamicTimePolicy: public BasePolicy {
     }
     
     if (!recent_latencies.empty()) {
-      double sum = std::accumulate(recent_latencies.begin(), recent_latencies.end(), 0.0);
-      avg_lateness_ns = sum / recent_latencies.size();
+        avg_lateness_ns = *std::max_element(recent_latencies.begin(), recent_latencies.end());
     } else {
-      avg_lateness_ns = 0.0;
+        avg_lateness_ns = 0;
     }
 
     const std::size_t event_size_bytes = event.size_bytes();

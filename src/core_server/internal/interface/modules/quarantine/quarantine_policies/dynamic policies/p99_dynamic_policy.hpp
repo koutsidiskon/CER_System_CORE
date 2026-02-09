@@ -16,7 +16,7 @@
 #include <utility>
 #include <algorithm>
 
-#include "base_policy.hpp"
+#include "../base_policy.hpp"
 #include "core_server/internal/coordination/catalog.hpp"
 #include "quill/LogMacros.h"
 #include "shared/datatypes/aliases/port_number.hpp"
@@ -25,8 +25,8 @@
 
 namespace CORE::Internal::Interface::Module::Quarantine {
 
-class DynamicTimePolicy: public BasePolicy {
-  std::mutex events_lock;
+class P99DynamicPolicy: public BasePolicy {
+    std::mutex events_lock;
     std::set<Types::EventWrapper> events;
     std::chrono::duration<int64_t, std::nano> time_to_wait;
     std::chrono::time_point<std::chrono::system_clock> last_save = std::chrono::system_clock::now();
@@ -36,67 +36,51 @@ class DynamicTimePolicy: public BasePolicy {
     size_t max_quarantine_size = 0;
     size_t current_quarantine_bytes = 0;
     size_t max_quarantine_bytes = 0;
-    std::optional<int64_t> last_received_event_time;
     bool end_of_stream_received = false;
 
-    double safety_margin = 1.5;  
+    std::optional<int64_t> last_received_event_time;
+    Types::IntValue last_time_sent = Types::IntValue::create_lower_bound();
+    double safety_margin = 1.5;
     double avg_lateness_ns = 0.0;
-    double learning_rate = 0.1;
     const double max_quarantine_ns = 1000000.0 * 1e9;
     
-    std::deque<double> recent_latencies; 
-    size_t window_size = 500;  
-
-    Types::IntValue last_time_sent = Types::IntValue::create_lower_bound();
+    double rate = 0.1;
+    size_t window_size = 500;
+    std::deque<double> recent_latencies;
+    double percentile = 0.99; 
 
  public:
-  DynamicTimePolicy(Catalog& catalog,
+  P99DynamicPolicy(Catalog& catalog,
                  std::atomic<Types::PortNumber>& next_available_inproc_port,
                  std::chrono::duration<int64_t, std::nano> time_to_wait,
-                 double safety_margin = 1.5,
-                 size_t latency_window_size = 500)
+                 double safety_margin = 1.5, 
+                 size_t latency_window_size = 500,
+                 double percentile_value = 0.99)
     : BasePolicy(catalog, next_available_inproc_port),
       time_to_wait(time_to_wait),
       safety_margin(safety_margin),
-      window_size(latency_window_size) {
+      window_size(latency_window_size),
+      percentile(percentile_value) {
     this->start();
   }
-  
-  void set_latency_window_size(size_t new_size) {
-      std::lock_guard<std::mutex> lock(events_lock);
-      window_size = new_size;
-      while (recent_latencies.size() > window_size) {
-          recent_latencies.pop_front();
-      }
-  }
 
-  ~DynamicTimePolicy() { this->handle_destruction(); }
+  ~P99DynamicPolicy() { this->handle_destruction(); }
 
   void save_events_to_disk() {
-    if (events.empty()) {
-      return;
-    }
+    if (events.empty()) return;
+    
     std::string out = "[";
-
     for (auto& event : events) {
       out += event.to_json() + ",\n";
     }
-
-    // Remove the last comma and newline
-    out = out.substr(0, out.size() - 2);
-
-    out += "]";
+    out = out.substr(0, out.size() - 2) + "]";
 
     std::string filename = "events_"
                            + std::to_string(last_save.time_since_epoch().count()) + "_"
-                           + std::to_string(
-                             events.begin()->get_event_reference().get_event_type_id())
+                           + std::to_string(events.begin()->get_event_reference().get_event_type_id())
                            + ".json";
-
     std::ofstream myfile(filename);
-
     myfile << out;
-
     myfile.close();
   }
 
@@ -109,10 +93,8 @@ class DynamicTimePolicy: public BasePolicy {
     
     if (event_gen_time < last_time_sent.val) {
       drops++;
-      LOG_WARNING(logger,
-                 "Dropping out-of-order event. Current: {}, New: {}",
-                 last_time_sent.val,
-                 event.get_primary_time().val);
+      LOG_WARNING(logger, "Dropping out-of-order event. Current Watermark: {}, New Event: {}",
+                 last_time_sent.val, event.get_primary_time().val);
       return;
     }
     
@@ -122,23 +104,21 @@ class DynamicTimePolicy: public BasePolicy {
     if (current_latency_ns >= 0) { 
         recent_latencies.push_back(current_latency_ns);
     }
-    
     if (recent_latencies.size() > window_size) {
         recent_latencies.pop_front();
     }
     
     if (!recent_latencies.empty()) {
-        double window_max = *std::max_element(recent_latencies.begin(), recent_latencies.end());
+        std::vector<double> sorted_latencies(recent_latencies.begin(), recent_latencies.end());
+        std::sort(sorted_latencies.begin(), sorted_latencies.end());
+        size_t idx = static_cast<size_t>(sorted_latencies.size() * percentile);
+        if (idx >= sorted_latencies.size()) idx = sorted_latencies.size() - 1;
+        double p_value = sorted_latencies[idx];
         
-        if (window_max > avg_lateness_ns) {
-            avg_lateness_ns = window_max;
-        } else {
-            avg_lateness_ns = (1.0 - learning_rate) * avg_lateness_ns + learning_rate * window_max;
-        }
+        avg_lateness_ns = (1.0 - rate) * avg_lateness_ns + (rate * p_value);
     } else {
         avg_lateness_ns = 0;
     }
-
     const std::size_t event_size_bytes = event.size_bytes();
     events.insert(std::move(event));
     current_quarantine_bytes += event_size_bytes;
@@ -165,9 +145,6 @@ class DynamicTimePolicy: public BasePolicy {
 }
 
  protected:
-  /**
-   * Tries to add received tuples to send queue according to specific policy
-   */
   void try_add_tuples_to_send_queue() override {
     if (!last_received_event_time || events.empty()) {
         return;
@@ -183,13 +160,14 @@ class DynamicTimePolicy: public BasePolicy {
       const auto& event = *iter;
       auto event_arrival_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
       
-      double current_lateness_ns = (last_received_event_time.value() - event_arrival_time) * 1e9;  
+      double time_spent_waiting_ns = (last_received_event_time.value() - event_arrival_time) * 1e9;  
       
-      if ((current_lateness_ns > dynamic_quarantine_ns) || end_of_stream_received) {
+      if ((time_spent_waiting_ns > dynamic_quarantine_ns) || end_of_stream_received) {
         sent_events++;
         
-        assert(event.get_primary_time().val >= last_time_sent.val
-                && "Event time is not after last time sent");
+        if (event.get_primary_time().val < last_time_sent.val) {
+             LOG_ERROR(logger, "Order Violation! Sending {} after {}", event.get_primary_time().val, last_time_sent.val);
+        }
         
         auto internal_node = events.extract(iter++);
         current_quarantine_bytes -= internal_node.value().size_bytes();
@@ -200,7 +178,6 @@ class DynamicTimePolicy: public BasePolicy {
       }
     }
   }
-
 
   void force_add_tuples_to_send_queue() override {
     std::cout << "Number of events RECEIVED by quarantine: " << received_events << std::endl;

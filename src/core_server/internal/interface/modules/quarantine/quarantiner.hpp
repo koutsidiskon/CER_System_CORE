@@ -23,7 +23,12 @@
 #include "core_server/internal/interface/modules/quarantine/quarantine_policies/quarantine_policy_type.hpp"
 #include "core_server/internal/interface/modules/quarantine/quarantine_policies/wait_fixed_time_policy.hpp"
 #include "core_server/internal/interface/modules/quarantine/quarantine_policies/new_fixed_time_policy.hpp"
-#include "core_server/internal/interface/modules/quarantine/quarantine_policies/dynamic_time_policy.hpp"
+#include "core_server/internal/interface/modules/quarantine/quarantine_policies/dynamic policies/jad_dynamic_policy.hpp"
+#include "core_server/internal/interface/modules/quarantine/quarantine_policies/dynamic policies/max_dynamic_policy.hpp"
+#include "core_server/internal/interface/modules/quarantine/quarantine_policies/dynamic policies/p99_dynamic_policy.hpp"
+#include "core_server/internal/interface/modules/quarantine/quarantine_policies/dynamic policies/avg_dynamic_policy.hpp"
+#include "core_server/internal/interface/modules/quarantine/quarantine_policies/dynamic policies/per_event_dynamic_policy.hpp"
+#include "core_server/internal/interface/modules/quarantine/quarantine_policies/dynamic policies/max_ema_dynamic_policy.hpp"
 #include "core_server/library/components/result_handler/result_handler.hpp"
 #include "shared/datatypes/aliases/port_number.hpp"
 #include "shared/datatypes/aliases/query_info_id.hpp"
@@ -162,12 +167,47 @@ class QuarantineManager {
         }
         return std::make_unique<NewFixedTimePolicy>(
           catalog, next_available_inproc_port, quarantine_policy.time_window.value());
-      case QuarantinePolicy::QuarantinePolicyType::DynamicTimePolicy:
+      case QuarantinePolicy::QuarantinePolicyType::AvgDynamicPolicy:
         if (!quarantine_policy.time_window.has_value()) {
           throw std::runtime_error(
-            "Time window must be specified for DynamicTimePolicy");
+            "Time window must be specified for AvgDynamicPolicy");
         }
-        return std::make_unique<DynamicTimePolicy>(
+        return std::make_unique<AvgDynamicPolicy>(
+          catalog, next_available_inproc_port, quarantine_policy.time_window.value());
+      case QuarantinePolicy::QuarantinePolicyType::JadDynamicPolicy:
+        if (!quarantine_policy.time_window.has_value()) {
+          throw std::runtime_error(
+            "Time window must be specified for JadDynamicPolicy");
+        }
+        return std::make_unique<JadDynamicPolicy>(
+          catalog, next_available_inproc_port, quarantine_policy.time_window.value());
+      case QuarantinePolicy::QuarantinePolicyType::MaxDynamicPolicy:
+        if (!quarantine_policy.time_window.has_value()) {
+          throw std::runtime_error(
+            "Time window must be specified for MaxDynamicPolicy");
+        }
+        return std::make_unique<MaxDynamicPolicy>(
+          catalog, next_available_inproc_port, quarantine_policy.time_window.value());
+      case QuarantinePolicy::QuarantinePolicyType::MaxEmaDynamicPolicy:
+        if (!quarantine_policy.time_window.has_value()) {
+          throw std::runtime_error(
+            "Time window must be specified for MaxEmaDynamicPolicy");
+        }
+        return std::make_unique<MaxEmaDynamicPolicy>(
+          catalog, next_available_inproc_port, quarantine_policy.time_window.value());
+      case QuarantinePolicy::QuarantinePolicyType::P99DynamicPolicy:
+        if (!quarantine_policy.time_window.has_value()) {
+          throw std::runtime_error(
+            "Time window must be specified for P99DynamicPolicy");
+        }
+        return std::make_unique<P99DynamicPolicy>(
+          catalog, next_available_inproc_port, quarantine_policy.time_window.value());
+      case QuarantinePolicy::QuarantinePolicyType::PerEventDynamicPolicy:
+        if (!quarantine_policy.time_window.has_value()) {
+          throw std::runtime_error(
+            "Time window must be specified for PerEventDynamicPolicy");
+        }
+        return std::make_unique<PerEventDynamicPolicy>(
           catalog, next_available_inproc_port, quarantine_policy.time_window.value());
       default:
         throw std::runtime_error("Invalid policy type");

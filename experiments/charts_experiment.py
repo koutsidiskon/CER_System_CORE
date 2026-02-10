@@ -10,7 +10,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 
 BUILD = (sys.argv[1].lower() if len(sys.argv) > 2 else "release")
-QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q3.txt"
+QUERY = sys.argv[3] if len(sys.argv) > 3 else "src/targets/experiments/crypto/q2.txt"
 DECL = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/crypto.core"
 CSV_ORDERED = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
 CSV = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/CSV/crypto.csv"
@@ -85,7 +85,7 @@ def run_test(description, cmd, query_contents, options_contents=None):
     median_detection_delay = 0.0
     min_detection_delay = 0.0
     max_detection_delay = 0.0
-    m95th_percentile_detection_delay = 0.0
+    percentile_95th_detection_delay = 0.0
 
     t0 = time.perf_counter()
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -160,9 +160,9 @@ def run_test(description, cmd, query_contents, options_contents=None):
                     if match:
                         max_detection_delay = float(match.group(1))
                 elif line.startswith("95th percentile detection delay: "):
-                    match = re.search(r"([\d.]+)", line) 
+                    match = re.search(r":\s*([\d.]+)", line)
                     if match:
-                        m95th_percentile_detection_delay = float(match.group(1))
+                        percentile_95th_detection_delay = float(match.group(1))
                 quarantine_file.write(f"{line}\n")
     
     if options_contents is None:
@@ -171,9 +171,12 @@ def run_test(description, cmd, query_contents, options_contents=None):
     
     received_order, sent_order, complex_events = extract_events(result.stdout)
 
-    return received_order, sent_order, complex_events, elapsed_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb, std_deviation, median_detection_delay, min_detection_delay, max_detection_delay, m95th_percentile_detection_delay
-
+    return received_order, sent_order, complex_events, elapsed_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb, std_deviation, median_detection_delay, min_detection_delay, max_detection_delay, percentile_95th_detection_delay
 if __name__ == "__main__":
+    # Create charts directory if it doesn't exist
+    CHARTS_DIR = os.path.join(SCRIPT_DIR, "charts")
+    os.makedirs(CHARTS_DIR, exist_ok=True)
+    
     if subprocess.call(["docker", "image", "inspect", IMG_LOCAL], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL):
         print("Building local image (core-dev)…")
         subprocess.run([
@@ -222,7 +225,7 @@ if __name__ == "__main__":
     medianDetectionDelays = []
     minDetectionDelays = []
     maxDetectionDelays = []
-    m95thPercentileDetectionDelays = []
+    percentile_95thDetectionDelays = []
     
     results_labels = ["Execution Time (s)", "Throughput (results/s)", "Number of Results", "Number of Drops", "Average Detection Delay (s)"]
 
@@ -238,7 +241,7 @@ if __name__ == "__main__":
             f.write(options_contents)
 
         cmd_wait = ["docker", "run", "--rm", *PLATFORM_FLAG, *ENV_FLAG, *MOUNT_FLAGS, IMG_LOCAL, *CMD_WITH_QUARANTINE]
-        received_wait, sent_wait, events_wait, core_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb, std_deviation, median_detection_delay, min_detection_delay, max_detection_delay, m95th_percentile_detection_delay = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
+        received_wait, sent_wait, events_wait, core_time, drops, avg_detection_delay, max_quarantine_size, max_quarantine_size_mb, std_deviation, median_detection_delay, min_detection_delay, max_detection_delay, percentile_95th_detection_delay = run_test("WAIT Quarantine Policy", cmd_wait, query_contents, options_contents)
         execution_time.append(round(core_time,2))
         throughput.append(round((num_results_direct / core_time),2))
         numOfResults.append(len(events_wait))
@@ -250,7 +253,7 @@ if __name__ == "__main__":
         medianDetectionDelays.append(round(median_detection_delay,5))
         minDetectionDelays.append(round(min_detection_delay,5))
         maxDetectionDelays.append(round(max_detection_delay,5))
-        m95thPercentileDetectionDelays.append(round(m95th_percentile_detection_delay,5))
+        percentile_95thDetectionDelays.append(round(percentile_95th_detection_delay,5))
     
     print("== Quarantine Time ==", end="")
     for i in range(len(results_labels)):
@@ -303,7 +306,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
-    plt.savefig("Execution Time.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Execution Time.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Throughput =======
@@ -330,7 +333,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
-    plt.savefig("Throughput.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Throughput.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Results Found =======
@@ -357,7 +360,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
-    plt.savefig("Results.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Results.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Drops =======
@@ -384,7 +387,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
-    plt.savefig("Dropped Events.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Dropped Events.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Average Detection Delay =======
@@ -407,7 +410,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
-    plt.savefig("Average Detection Delay.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Average Detection Delay.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Maximum Quarantine Size =======
@@ -434,7 +437,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
-    plt.savefig("Maximum Quarantine Size.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Maximum Quarantine Size.png"), dpi=300, bbox_inches='tight')
     #plt.show() 
 
     # ======= Maximum Quarantine Size (MB) =======
@@ -461,7 +464,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()  # Adjust layout to prevent label cutoff
-    plt.savefig("Maximum Quarantine Size (MB).png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Maximum Quarantine Size (MB).png"), dpi=300, bbox_inches='tight')
     #plt.show() 
 
     # ======= Standard Deviation =======
@@ -480,7 +483,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("Standard Deviation.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Standard Deviation.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Median Detection Delay =======
@@ -499,7 +502,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("Median Detection Delay.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Median Detection Delay.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Min Detection Delay =======
@@ -518,7 +521,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("Min Detection Delay.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Min Detection Delay.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= Max Detection Delay =======
@@ -537,17 +540,17 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("Max Detection Delay.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "Max Detection Delay.png"), dpi=300, bbox_inches='tight')
     #plt.show()
 
     # ======= 95th Percentile Detection Delay =======
     plt.figure(figsize=(15,8))
     x_pos = range(len(quarantine_times))
-    plt.plot(x_pos, m95thPercentileDetectionDelays, 'o-', color='tab:orange', label=f'{policy_key} Policy')
-    y_min, y_max = min(m95thPercentileDetectionDelays), max(m95thPercentileDetectionDelays)
+    plt.plot(x_pos, percentile_95thDetectionDelays, 'o-', color='tab:orange', label=f'{policy_key} Policy')
+    y_min, y_max = min(percentile_95thDetectionDelays), max(percentile_95thDetectionDelays)
     y_range = y_max - y_min if y_max > y_min else 1
     offset = y_range * 0.02
-    for x, y in zip(x_pos, m95thPercentileDetectionDelays):
+    for x, y in zip(x_pos, percentile_95thDetectionDelays):
         plt.text(x, y + offset, f"{y:.5f}", ha='center', fontsize=9, va='bottom')
     plt.xticks(x_pos, [str(t) for t in quarantine_times], fontsize=8, rotation=45)
     plt.title('95th Percentile Detection Delay vs Quarantine Time', pad=10)
@@ -556,7 +559,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("95th Percentile Detection Delay.png", dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(CHARTS_DIR, "95th Percentile Detection Delay.png"), dpi=300, bbox_inches='tight')
     #plt.show() 
     
 
@@ -583,7 +586,7 @@ if __name__ == "__main__":
     print(f"Median Detection Delays (s): {tuple(medianDetectionDelays)}")
     print(f"Min Detection Delays (s): {tuple(minDetectionDelays)}")
     print(f"Max Detection Delays (s): {tuple(maxDetectionDelays)}")
-    print(f"95th Percentile Detection Delays (s): {tuple(m95thPercentileDetectionDelays)}")
+    print(f"95th Percentile Detection Delays (s): {tuple(percentile_95thDetectionDelays)}")
     print("="*70)
         
         

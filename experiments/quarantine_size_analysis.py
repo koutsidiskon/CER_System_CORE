@@ -159,7 +159,7 @@ DATASETS: Dict[str, Dict[str, Dict[str, List[float]]]] = {
 }
 # ===========================================================
 
-OUTPUT_DIR = "quarantine_size"
+OUTPUT_DIR = os.path.join("experiments", "quarantine_size")
 
 
 def _validate_dataset(dataset_name: str, policy_data: Dict[str, Dict[str, List[float]]]) -> None:

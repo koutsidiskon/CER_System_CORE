@@ -30,12 +30,14 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 MODE = sys.argv[1] if len(sys.argv) > 1 else "compare"
 NUM_RUNS = int(sys.argv[2]) if len(sys.argv) > 2 else 10
 BUILD = sys.argv[3] if len(sys.argv) > 3 else "release"
-QUERY = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/aviation/q3.txt"
-DECL = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/aviation/aviation.core"
-CSV = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/aviation/CSV/aviation_sorted.csv"
-OPTIONS = sys.argv[7] if len(sys.argv) > 7 else "src/targets/experiments/aviation/aviation_quarantine.core"
+QUERY = sys.argv[4] if len(sys.argv) > 4 else "src/targets/experiments/crypto/q3.txt"
+DECL = sys.argv[5] if len(sys.argv) > 5 else "src/targets/experiments/crypto/crypto.core"
+CSV = sys.argv[6] if len(sys.argv) > 6 else "src/targets/experiments/crypto/CSV/crypto_sorted.csv"
+OPTIONS = sys.argv[7] if len(sys.argv) > 7 else "src/targets/experiments/crypto/crypto_quarantine.core"
 
 OPTIONS_PATH = os.path.join(PROJECT_ROOT, OPTIONS)
+
+POLICY_TIME_PATTERN = r'^\s*([A-Z_]*DYNAMIC_TIME|FIXED_TIME|NEW_FIXED_TIME)\s+(\d+)\s+seconds\b'
 
 def extract_metrics_direct(output):
     """Extract metrics from direct mode output."""
@@ -124,26 +126,30 @@ def write_options_file(contents):
         f.write(contents)
 
 def get_dynamic_times_from_options(options_contents):
-    """Extract and calculate NEW_FIXED_TIME values to test from the options file."""
-    match = re.search(r'NEW_FIXED_TIME\s+(\d+)\s+seconds', options_contents)
+    """Extract and calculate policy time values to test from the options file."""
+    match = re.search(POLICY_TIME_PATTERN, options_contents, flags=re.MULTILINE)
     if not match:
-        return []
-    
-    number = int(match.group(1))
+        return None, []
+
+    policy_key = match.group(1)
+    number = int(match.group(2))
     dynamic_times = []
-    
+
     x = number
     while x >= 1:
         dynamic_times.append(int(x))
         x /= 2
-    
-    return sorted(dynamic_times)
 
-def update_dynamic_time(options_contents, dynamic_time):
-    """Update the NEW_FIXED_TIME value in the options contents."""
-    return re.sub(r'NEW_FIXED_TIME\s+\d+\s+seconds',
-                  f'NEW_FIXED_TIME {dynamic_time} seconds',
-                  options_contents)
+    return policy_key, sorted(dynamic_times)
+
+def update_dynamic_time(options_contents, policy_key, dynamic_time):
+    """Update the policy time value in the options contents."""
+    pattern = rf'(^\s*{re.escape(policy_key)}\s+)\d+(\s+seconds\b)'
+    return re.sub(pattern,
+                  rf'\g<1>{dynamic_time}\g<2>',
+                  options_contents,
+                  flags=re.MULTILINE,
+                  count=1)
 
 def run_experiment(run_num, total_runs, dynamic_time=None):
     """Run a single experiment and return its metrics."""
@@ -322,13 +328,14 @@ def main():
         original_options = read_options_file()
         
         # Get dynamic time values to test
-        dynamic_times = get_dynamic_times_from_options(original_options)
-        
+        policy_key, dynamic_times = get_dynamic_times_from_options(original_options)
+
         if not dynamic_times:
-            print("❌ No NEW_FIXED_TIME found in options file!")
+            print("❌ No policy time setting found in options file!")
             sys.exit(1)
-        
-        print(f"\n📋 Dynamic times to test: {dynamic_times}")
+
+        print(f"\n📋 Policy: {policy_key}")
+        print(f"📋 Dynamic times to test: {dynamic_times}")
         print(f"🔁 Running {NUM_RUNS} experiments for each dynamic time value\n")
         
         # Store averages for each dynamic time
@@ -338,11 +345,11 @@ def main():
         # Run experiments for each dynamic time
         for dynamic_time in dynamic_times:
             print(f"\n{'='*70}")
-            print(f"⏱️  Testing NEW_FIXED_TIME = {dynamic_time} seconds")
+            print(f"⏱️  Testing {policy_key} = {dynamic_time} seconds")
             print(f"{'='*70}")
             
             # Update options file with new dynamic time
-            updated_options = update_dynamic_time(original_options, dynamic_time)
+            updated_options = update_dynamic_time(original_options, policy_key, dynamic_time)
             write_options_file(updated_options)
             
             # Run NUM_RUNS experiments

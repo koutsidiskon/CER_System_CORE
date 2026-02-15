@@ -39,9 +39,9 @@ DATASETS = {
             "num_drops":   [79434,79434,79434,79434,79434,79434,79434,79434,79434,79434,79434,79434,79434,79434,79434],
             "exec_time":   [9.90, 9.85, 9.87, 9.84, 9.86, 9.79, 9.84, 9.79, 9.83, 9.80, 9.86, 9.74, 9.57, 9.66, 9.76],
             "avg_detection_delay": [240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000, 240.00000],
-            "median_detection_delay": [],
-            "std_detection_delay": [],
-            "p95_detection_delay": []
+            "median_detection_delay": [240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000],
+            "std_detection_delay": [55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503,55.9503],
+            "p95_detection_delay": [300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000,300.0000]
         },
         "Fixed-Time": {
             "num_results": [44, 44, 44, 44, 44, 44, 44, 44, 46, 46, 46, 46, 46, 46, 46],
@@ -82,11 +82,11 @@ DATASETS = {
         "Sorted": {
             "num_results": [46,46,46,46,46,46,46,46,46,46,46,46,46,46,46],
             "num_drops": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            "exec_time": [],
-            "avg_detection_delay": [],
-            "median_detection_delay": [],
-            "std_detection_delay": [],
-            "p95_detection_delay": []
+            "exec_time": [11.61, 11.43, 11.54, 11.11, 11.48, 11.66, 11.52, 10.99, 11.56, 10.79, 11.31, 11.09, 10.77, 11.45, 10.82],
+            "avg_detection_delay": [220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480, 220.43480],
+            "median_detection_delay": [240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000,240.0000],
+            "std_detection_delay": [80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617,80.1617],
+            "p95_detection_delay": [360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000,360.0000]
         },
     },
     "Aviation": {
@@ -95,9 +95,9 @@ DATASETS = {
             "num_drops":   [336293,336293,336293,336293,336293,336293,336293,336293,336293,336293,336293,336293,336293,336293,336293],
             "exec_time":   [12.66, 12.44, 12.50, 12.98, 12.55, 12.87, 13.13, 12.65, 12.72, 12.81, 12.99, 12.80, 12.90, 13.09, 12.72],
             "avg_detection_delay": [0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642, 0.22642],
-            "median_detection_delay": [],
-            "std_detection_delay": [],
-            "p95_detection_delay": []
+            "median_detection_delay": [0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000],
+            "std_detection_delay": [3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788,3.6788],
+            "p95_detection_delay": [0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000]
         },
         "Fixed-Time": {
             "num_results": [282, 282, 282, 282, 282, 282, 316, 341, 399, 440, 473, 487, 492, 493, 493],
@@ -138,11 +138,11 @@ DATASETS = {
         "Sorted": {
             "num_results": [493,493,493,493,493,493,493,493,493,493,493,493,493,493,493],
             "num_drops": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            "exec_time": [],
-            "avg_detection_delay": [],
-            "median_detection_delay": [],
-            "std_detection_delay": [],
-            "p95_detection_delay": []
+            "exec_time": [13.66, 14.48, 13.80, 14.30, 13.72, 14.35, 13.76, 13.78, 14.31, 13.68, 14.26, 13.76, 14.48, 13.71, 14.23],
+            "avg_detection_delay": [1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930, 1252.08930],
+            "median_detection_delay": [0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000],
+            "std_detection_delay": [2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912,2809.5912],
+            "p95_detection_delay": [6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000,6780.0000]
         },
     },
     "Crypto": {
@@ -151,9 +151,9 @@ DATASETS = {
             "num_drops":   [1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280,1739280],
             "exec_time":   [14.76, 14.62, 14.38, 14.68, 14.52, 14.82, 14.60, 14.41, 14.33, 14.62, 14.29, 14.93, 14.61, 14.35, 14.60],
             "avg_detection_delay": [13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000, 13.00000],
-            "median_detection_delay": [],
-            "std_detection_delay": [],
-            "p95_detection_delay": []
+            "median_detection_delay": [13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000],
+            "std_detection_delay": [0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000],
+            "p95_detection_delay": [13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000,13.0000]
         },
         "Fixed-Time": {
             "num_results": [1314, 1314, 1317, 1318, 1324, 1375, 1446, 1515, 1618, 2012, 2392, 2926, 3656, 3849, 3886],
@@ -194,11 +194,11 @@ DATASETS = {
         "Sorted": {
             "num_results": [3908,3908,3908,3908,3908,3908,3908,3908,3908,3908,3908,3908,3908,3908,3908],
             "num_drops": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            "exec_time": [],
-            "avg_detection_delay": [],
-            "median_detection_delay": [],
-            "std_detection_delay": [],
-            "p95_detection_delay": []
+            "exec_time": [18.52, 18.42, 21.63, 19.28, 19.55, 18.30, 18.26, 18.50, 18.29, 18.33, 18.24, 18.25, 18.30, 18.31, 18.35],
+            "avg_detection_delay": [3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630, 3028.53630],
+            "median_detection_delay": [662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000,662.0000],
+            "std_detection_delay": [8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426,8876.3426],
+            "p95_detection_delay": [16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000,16389.0000]
         },
     },
 }
@@ -267,7 +267,7 @@ def build_tables():
     for dataset_name, implementations in DATASETS.items():
         tables = {}
         # Core metrics tables
-        for metric in ["num_results", "num_drops", "exec_time", "avg_detection_delay"]:
+        for metric in ["num_results", "num_drops", "exec_time", "avg_detection_delay", "median_detection_delay", "std_detection_delay", "p95_detection_delay"]:
             data = {"Quarantine Time (s)": QUARANTINE_TIMES}
             for impl_name in IMPLEMENTATIONS:
                 data[impl_name] = implementations.get(impl_name, {}).get(metric, [])
@@ -291,7 +291,7 @@ def build_tables():
 
         # Derived: combined jump (diff) and decay (% change) for all metrics per implementation
         jnd_data = {"Quarantine Time (s)": QUARANTINE_TIMES}
-        for metric in ["num_results", "num_drops", "exec_time", "avg_detection_delay"]:
+        for metric in ["num_results", "num_drops", "exec_time", "avg_detection_delay", "median_detection_delay", "std_detection_delay", "p95_detection_delay"]:
             metric_df = tables[metric]
             for col in metric_df.columns[1:]:
                 series = pd.Series(metric_df[col].values)
@@ -304,7 +304,7 @@ def build_tables():
 
         # Derived: max per metric per implementation
         max_rows = []
-        for metric in ["num_results", "num_drops", "exec_time", "avg_detection_delay"]:
+        for metric in ["num_results", "num_drops", "exec_time", "avg_detection_delay", "median_detection_delay", "std_detection_delay", "p95_detection_delay"]:
             row = {"Metric": metric}
             for impl in IMPLEMENTATIONS:
                 vals = tables[metric][impl].values if impl in tables[metric] else []
@@ -322,7 +322,10 @@ def save_excel(all_dataset_tables, path):
             tables["num_results"].to_excel(writer, sheet_name=f"{dataset_name}_Results", index=False)
             tables["num_drops"].to_excel(writer, sheet_name=f"{dataset_name}_Drops", index=False)
             tables["exec_time"].to_excel(writer, sheet_name=f"{dataset_name}_ExecTime", index=False)
-            tables["avg_detection_delay"].to_excel(writer, sheet_name=f"{dataset_name}_DetDelay", index=False)
+            tables["avg_detection_delay"].to_excel(writer, sheet_name=f"{dataset_name}_AvgDetDelay", index=False)
+            tables["median_detection_delay"].to_excel(writer, sheet_name=f"{dataset_name}_MedDetDelay", index=False)
+            tables["std_detection_delay"].to_excel(writer, sheet_name=f"{dataset_name}_StdDetDelay", index=False)
+            tables["p95_detection_delay"].to_excel(writer, sheet_name=f"{dataset_name}_P95DetDelay", index=False)
             tables["jump_and_decay"].to_excel(writer, sheet_name=f"{dataset_name}_JumpAndDecay", index=False)
             tables["max"].to_excel(writer, sheet_name=f"{dataset_name}_Max", index=False)
     print(f"✓ Saved Excel: {path}")
@@ -339,11 +342,11 @@ def save_excel_pct(all_dataset_tables, path):
     print(f"✓ Saved Excel: {path}")
 
 
-def plot_lines(tables, metric, ylabel, filename, dataset_name):
+def plot_lines(tables, metric, ylabel, filename, dataset_name, exclude_sorted=True):
     df = tables[metric]
     x = list(range(len(df["Quarantine Time (s)"])))
     plt.figure(figsize=(12, 6))
-    series_names = [c for c in df.columns[1:] if c != "Sorted"]
+    series_names = [c for c in df.columns[1:] if c != "Sorted" or not exclude_sorted]
     y_series = []
     for col in series_names:
         y_vals = df[col].values
@@ -467,13 +470,19 @@ def plot_all(all_dataset_tables):
         plot_lines(tables, "num_results", "Number of Results", f"compare_{safe_name}_results.png", dataset_name)
         plot_drops_enhanced(tables, dataset_name)
         plot_lines(tables, "exec_time", "Execution Time (s)", f"compare_{safe_name}_exec_time.png", dataset_name)
-        plot_lines(tables, "avg_detection_delay", "Detection Delay (s)", f"compare_{safe_name}_avg_detection_delay.png", dataset_name)
+        plot_lines(tables, "avg_detection_delay", "Avg Detection Delay (s)", f"compare_{safe_name}_avg_detection_delay.png", dataset_name)
+        plot_lines(tables, "median_detection_delay", "Median Detection Delay (s)", f"compare_{safe_name}_median_detection_delay.png", dataset_name, exclude_sorted=False)
+        plot_lines(tables, "std_detection_delay", "Std Dev Detection Delay (s)", f"compare_{safe_name}_std_detection_delay.png", dataset_name, exclude_sorted=False)
+        plot_lines(tables, "p95_detection_delay", "95th Percentile Detection Delay (s)", f"compare_{safe_name}_p95_detection_delay.png", dataset_name, exclude_sorted=False)
         
         # Top 3 quarantine implementations plots
         plot_lines_top3(tables, "num_results", "Number of Results", f"compare_{safe_name}_results_top3.png", dataset_name)
         plot_drops_enhanced_top3(tables, dataset_name)
         plot_lines_top3(tables, "exec_time", "Execution Time (s)", f"compare_{safe_name}_exec_time_top3.png", dataset_name)
-        plot_lines_top3(tables, "avg_detection_delay", "Detection Delay (s)", f"compare_{safe_name}_avg_detection_delay_top3.png", dataset_name)
+        plot_lines_top3(tables, "avg_detection_delay", "Avg Detection Delay (s)", f"compare_{safe_name}_avg_detection_delay_top3.png", dataset_name)
+        plot_lines_top3(tables, "median_detection_delay", "Median Detection Delay (s)", f"compare_{safe_name}_median_detection_delay_top3.png", dataset_name)
+        plot_lines_top3(tables, "std_detection_delay", "Std Dev Detection Delay (s)", f"compare_{safe_name}_std_detection_delay_top3.png", dataset_name)
+        plot_lines_top3(tables, "p95_detection_delay", "95th Percentile Detection Delay (s)", f"compare_{safe_name}_p95_detection_delay_top3.png", dataset_name)
 
 
 def print_tables(all_dataset_tables):
@@ -487,8 +496,14 @@ def print_tables(all_dataset_tables):
         print(tables["num_drops"].to_string(index=False))
         print("\n=== Execution Time (s) ===")
         print(tables["exec_time"].to_string(index=False))
-        print("\n=== Detection Delay (s) ===")
+        print("\n=== Avg Detection Delay (s) ===")
         print(tables["avg_detection_delay"].to_string(index=False))
+        print("\n=== Median Detection Delay (s) ===")
+        print(tables["median_detection_delay"].to_string(index=False))
+        print("\n=== Std Dev Detection Delay (s) ===")
+        print(tables["std_detection_delay"].to_string(index=False))
+        print("\n=== 95th Percentile Detection Delay (s) ===")
+        print(tables["p95_detection_delay"].to_string(index=False))
         print("\n=== Jump + Decay (num_results diff and % change) ===")
         print(tables["jump_and_decay"].to_string(index=False))
         print("\n=== Max values across quarantine times ===")

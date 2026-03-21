@@ -36,7 +36,7 @@ class MaxEmaDynamicPolicy: public BasePolicy {
     size_t max_quarantine_size = 0;
     size_t current_quarantine_bytes = 0;
     size_t max_quarantine_bytes = 0;
-    std::optional<int64_t> last_received_event_time;
+    std::optional<int64_t> last_received_arrival_time;
     bool end_of_stream_received = false;
 
     double safety_margin = 1.5;  
@@ -104,7 +104,7 @@ class MaxEmaDynamicPolicy: public BasePolicy {
     std::lock_guard<std::mutex> lock(events_lock);
     received_events++;
 
-    last_received_event_time = event.get_attribute_at_index<Types::IntValue>(1).val;
+    last_received_arrival_time = event.get_attribute_at_index<Types::IntValue>(1).val;
     auto event_gen_time = event.get_primary_time().val; 
     
     if (event_gen_time < last_time_sent.val) {
@@ -116,7 +116,7 @@ class MaxEmaDynamicPolicy: public BasePolicy {
       return;
     }
     
-    double current_latency_sec = last_received_event_time.value() - event_gen_time;
+    double current_latency_sec = last_received_arrival_time.value() - event_gen_time;
     double current_latency_ns = current_latency_sec * 1e9;
     
     if (current_latency_ns >= 0) { 
@@ -165,7 +165,7 @@ class MaxEmaDynamicPolicy: public BasePolicy {
    * Tries to add received tuples to send queue according to specific policy
    */
   void try_add_tuples_to_send_queue() override {
-    if (!last_received_event_time || events.empty()) {
+    if (!last_received_arrival_time || events.empty()) {
         return;
     }
     
@@ -179,7 +179,7 @@ class MaxEmaDynamicPolicy: public BasePolicy {
       const auto& event = *iter;
       auto event_arrival_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
       
-      double current_lateness_ns = (last_received_event_time.value() - event_arrival_time) * 1e9;  
+      double current_lateness_ns = (last_received_arrival_time.value() - event_arrival_time) * 1e9;  
       
       if ((current_lateness_ns > dynamic_quarantine_ns) || end_of_stream_received) {
         sent_events++;

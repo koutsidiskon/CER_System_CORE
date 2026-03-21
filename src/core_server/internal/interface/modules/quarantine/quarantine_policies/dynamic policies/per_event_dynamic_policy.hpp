@@ -36,7 +36,7 @@ class PerEventDynamicPolicy: public BasePolicy {
     size_t max_quarantine_size = 0;
     size_t current_quarantine_bytes = 0;
     size_t max_quarantine_bytes = 0;
-    std::optional<int64_t> last_received_event_time;
+    std::optional<int64_t> last_received_arrival_time;
     bool end_of_stream_received = false;
     std::map<Types::UniqueEventTypeId, double> dynamic_time_per_event_type;
     std::map<Types::UniqueEventTypeId, std::deque<double>> latencies_per_type;
@@ -107,7 +107,7 @@ class PerEventDynamicPolicy: public BasePolicy {
 
     auto type_id = event.get_unique_event_type_id();
 
-    last_received_event_time = event.get_attribute_at_index<Types::IntValue>(1).val;
+    last_received_arrival_time = event.get_attribute_at_index<Types::IntValue>(1).val;
     auto event_gen_time = event.get_primary_time().val; 
     
     if (event_gen_time < last_time_sent.val) {
@@ -122,7 +122,7 @@ class PerEventDynamicPolicy: public BasePolicy {
       return;
     }
     
-    double current_latency_sec = last_received_event_time.value() - event_gen_time;
+    double current_latency_sec = last_received_arrival_time.value() - event_gen_time;
     double current_latency_ns = current_latency_sec * 1e9;
     
     if (current_latency_ns >= 0) {
@@ -176,7 +176,7 @@ class PerEventDynamicPolicy: public BasePolicy {
    * Tries to add received tuples to send queue according to specific policy
    */
   void try_add_tuples_to_send_queue() override {
-    if (!last_received_event_time || events.empty()) {
+    if (!last_received_arrival_time || events.empty()) {
         return;
     }
 
@@ -184,7 +184,7 @@ class PerEventDynamicPolicy: public BasePolicy {
       const auto& event = *iter;
       auto event_arrival_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
       
-      double current_lateness_ns = (last_received_event_time.value() - event_arrival_time) * 1e9;  
+      double current_lateness_ns = (last_received_arrival_time.value() - event_arrival_time) * 1e9;  
       
       double dynamic_quarantine_ns = std::clamp(
         dynamic_time_per_event_type[event.get_unique_event_type_id()] * safety_margin,

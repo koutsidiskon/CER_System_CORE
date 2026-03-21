@@ -34,7 +34,7 @@ class NewFixedTimePolicy: public BasePolicy {
   size_t max_quarantine_size = 0;
   size_t current_quarantine_bytes = 0;
   size_t max_quarantine_bytes = 0;
-  std::optional<int64_t> last_received_event_time;
+  std::optional<int64_t> last_received_arrival_time;
   bool end_of_stream_received = false;
 
   // Corresponds to the last time an event was sent
@@ -101,7 +101,7 @@ class NewFixedTimePolicy: public BasePolicy {
                   event.get_primary_time().val);
       return;
     }
-    last_received_event_time = event.get_attribute_at_index<Types::IntValue>(1).val;
+    last_received_arrival_time = event.get_attribute_at_index<Types::IntValue>(1).val;
     const std::size_t event_size_bytes = event.size_bytes();
     events.insert(std::move(event));
     current_quarantine_bytes += event_size_bytes;
@@ -140,9 +140,9 @@ class NewFixedTimePolicy: public BasePolicy {
     
     for (auto iter = events.begin(); iter != events.end();) {
       const Types::EventWrapper& event = *iter;
-      auto event_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
+      auto arrival_time = const_cast<Types::EventWrapper&>(event).get_attribute_at_index<Types::IntValue>(1).val;
       // Calculate delay using event timestamps
-      auto duration = std::chrono::nanoseconds(last_received_event_time.value() * 1000000000LL) - std::chrono::nanoseconds(event_time * 1000000000LL);
+      auto duration = std::chrono::nanoseconds(last_received_arrival_time.value() * 1000000000LL) - std::chrono::nanoseconds(arrival_time * 1000000000LL);
       if ((duration > time_to_wait) || (end_of_stream_received)){
         sent_events++;
         LOG_TRACE_L1(logger,

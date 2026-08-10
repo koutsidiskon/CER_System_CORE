@@ -2,6 +2,11 @@
 
 This document is a separate public-facing README for the additional work carried out on top of the original CORE project.
 
+## Authors
+
+- Koutsidis Konstantinos
+- Athanasios Krevvatas
+
 ## Project purpose
 
 The goal of this work was to extend the CORE engine with new quarantine-based strategies for handling delayed and out-of-order events in complex event recognition systems.

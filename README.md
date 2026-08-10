@@ -1,5 +1,7 @@
 # CORE: a Complex Event Recognition Engine
 
+> This repository also contains a thesis-specific overview for the additional work carried out by Koutsidis Konstantinos and Athanasios Krevvatas: [README-thesis.md](README-thesis.md)
+
 ## Overview
 
 This is a C++ reimplementation of the CORE engine, as presented in the paper ["CORE: a Complex Event Recognition Engine"](https://www.vldb.org/pvldb/vol15/p1951-riveros.pdf) by Marco Bucchi, Alejandro Grez, Andrés Quintana, Cristian Riveros, and Stijn Vansummeren. This engine is designed for the efficient evaluation of complex event queries over large data streams in real time.
